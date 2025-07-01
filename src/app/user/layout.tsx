@@ -1,5 +1,5 @@
 "use client";
-import UserSidebar from "@/components/Layout/UserSidebar";
+import UserSidebar from "@/components/layout/UserSidebar";
 import { ReactNode } from "react";
 
 const UserLayout = ({ children }: { children: ReactNode }) => {
