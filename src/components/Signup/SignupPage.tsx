@@ -124,7 +124,7 @@ const SignupPage = () => {
 
   return (
     <section className="flex">
-      <div className="w-full min-w-[50%] max-w-[816px]">
+      <div className="hidden md:block w-full min-w-[50%] max-w-[816px]">
         <Image
           width={0}
           height={0}
@@ -134,7 +134,7 @@ const SignupPage = () => {
           sizes="100vw"
         />
       </div>
-      <div className="w-[45%] flex justify-center">
+      <div className="w-full md:w-[45%] p-4 flex justify-center">
         <div className="w-full max-w-[517px] min-w-[80%] pt-22">
           <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
             Create Account

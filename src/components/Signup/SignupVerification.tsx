@@ -53,7 +53,7 @@ const SignupVerification = () => {
 
   return (
     <section className="h-lvh flex">
-      <div className="w-full min-w-[50%] max-w-[816px]">
+      <div className="w-full hidden md:block min-w-[50%] max-w-[816px]">
         <Image
           width={0}
           height={0}
@@ -63,7 +63,7 @@ const SignupVerification = () => {
           sizes="100vw"
         />
       </div>
-      <div className="w-[45%] flex justify-center">
+      <div className="w-full md:w-[45%] p-4 flex justify-center">
         <div className="w-full max-w-[517px] min-w-[80%] pt-22">
           <div>
             <img src="/logo.svg" alt="logo" />
