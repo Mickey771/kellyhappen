@@ -123,8 +123,8 @@ const SignupPage = () => {
   };
 
   return (
-    <section className="flex">
-      <div className="hidden md:block w-full min-w-[50%] max-w-[816px]">
+    <section className="flex flex-col gap-5 md:flex-row">
+      <div className=" md:block w-full min-w-[50%] h-[300px] md:h-full max-w-[816px]">
         <Image
           width={0}
           height={0}
@@ -134,8 +134,8 @@ const SignupPage = () => {
           sizes="100vw"
         />
       </div>
-      <div className="w-full md:w-[45%] p-4 flex justify-center">
-        <div className="w-full max-w-[517px] min-w-[80%] pt-22">
+      <div className="w-full md:w-1/2 lg:w-[45%] p-4 flex justify-center">
+        <div className="w-full max-w-[517px] min-w-[80%] md:pt-22">
           <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
             Create Account
           </h1>
@@ -147,7 +147,7 @@ const SignupPage = () => {
           )}
 
           <form
-            className="w-full flex flex-col gap-4 mt-13"
+            className="w-full flex flex-col gap-4 mt-5 md:mt-13"
             onSubmit={handleSubmit}
           >
             <div className="w-full">
@@ -277,7 +277,7 @@ const SignupPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-10 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+              className="md:mt-10 mt-4 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-lg md:rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-center justify-center text-xl font-normal font-['Poppins']">
                 {isLoading ? "Creating Account..." : "Sign Up"}

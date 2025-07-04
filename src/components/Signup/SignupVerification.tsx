@@ -52,8 +52,8 @@ const SignupVerification = () => {
   };
 
   return (
-    <section className="h-lvh flex">
-      <div className="w-full hidden md:block min-w-[50%] max-w-[816px]">
+    <section className="h-lvh flex flex-col md:flex-row">
+      <div className="w-full min-w-[50%] h-[300px] md:h-full max-w-[816px]">
         <Image
           width={0}
           height={0}
@@ -63,8 +63,8 @@ const SignupVerification = () => {
           sizes="100vw"
         />
       </div>
-      <div className="w-full md:w-[45%] p-4 flex justify-center">
-        <div className="w-full max-w-[517px] min-w-[80%] pt-22">
+      <div className="w-full md:w-1/2 lg:w-[45%] p-4 flex justify-center">
+        <div className="w-full max-w-[517px] min-w-[80%] pt-5 md:pt-22">
           <div>
             <img src="/logo.svg" alt="logo" />
           </div>
@@ -78,7 +78,7 @@ const SignupVerification = () => {
             </div>
           )}
 
-          <p className="my-[60px] justify-start">
+          <p className="my-5 md:my-[60px] justify-start">
             <span className="text-[#333] text-base font-normal font-['Poppins']">
               Your login and password details have been sent to your email:{" "}
             </span>
