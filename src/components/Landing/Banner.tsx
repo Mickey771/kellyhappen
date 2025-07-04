@@ -41,8 +41,10 @@ const Banner = () => {
           </button>
         </Link>
       </section>
-      <article className="p-5 bg-[#111111] w-full md:pb-0 mx-auto">
-        <HeroSlider mainClassName="!h-[390px] md:!h-[653px] max-w-[1256px]" />
+      <article className="p-5 bg-[#111111] w-full md:pb-0 flex justify-center items-center">
+        <div className="max-w-[1256px] w-full">
+          <HeroSlider mainClassName="!h-[390px] md:!h-[653px] " />
+        </div>
       </article>
     </>
   );

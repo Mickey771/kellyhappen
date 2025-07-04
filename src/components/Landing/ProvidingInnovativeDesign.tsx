@@ -10,7 +10,7 @@ const ProvidingInnovativeDesign = () => {
         Interior Design.
       </h2>
 
-      <div className="relative flex justify-end mt-5 md:mt-[90px]">
+      <div className="relative flex justify-end my-5 md:mt-[90px]">
         <div className="absolute left-0 top-0 bg-white w-full max-w-[50%] h-[252px] md:h-[600px]"></div>
         <div className="relative mt-[190px] w-[60%] h-[360px] md:h-[578px] bg-[#111] pt-[80px] md:pt-[155px]">
           <div className="absolute w-full md:max-w-[90%] -left-[47px] top-[10px]">
