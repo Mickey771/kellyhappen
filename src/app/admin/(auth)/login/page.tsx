@@ -1,10 +1,12 @@
+"use client";
+// components/admin/AdminLoginPage.tsx
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { IoPersonOutline } from "react-icons/io5";
 import { TbLockPassword } from "react-icons/tb";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { login, clearError } from "@/store/reducers/authSlice";
+import { adminLogin, clearError } from "@/store/reducers/adminAuthSlice";
 import { useRouter } from "next/navigation";
 
 interface FormData {
@@ -17,11 +19,11 @@ interface FormErrors {
   password?: string;
 }
 
-const LoginPage = () => {
+const AdminLoginPage = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { isLoading, error, isAuthenticated } = useAppSelector(
-    (state) => state.auth
+    (state) => state.adminAuth
   );
 
   const [formData, setFormData] = useState<FormData>({
@@ -33,7 +35,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/user/dashboard");
+      router.push("/admin/dashboard");
     }
 
     return () => {
@@ -71,7 +73,7 @@ const LoginPage = () => {
     if (!validateForm()) return;
 
     try {
-      await dispatch(login(formData)).unwrap();
+      await dispatch(adminLogin(formData)).unwrap();
     } catch (error) {
       // Error handled by Redux slice
     }
@@ -83,7 +85,7 @@ const LoginPage = () => {
         <Image
           width={0}
           height={0}
-          alt="loginimg"
+          alt="adminloginimg"
           src={"/images/loginimg.png"}
           style={{ width: "100%", height: "100%" }}
           sizes="100vw"
@@ -91,8 +93,14 @@ const LoginPage = () => {
       </div>
       <div className="w-[45%] flex justify-center">
         <div className="w-full max-w-[517px] min-w-[80%] pt-22">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="bg-red-600 text-white px-3 py-1 rounded text-sm font-medium">
+              ADMIN
+            </div>
+          </div>
+
           <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
-            Welcome Back
+            Admin Portal
           </h1>
 
           {error && (
@@ -113,7 +121,7 @@ const LoginPage = () => {
                 <span>
                   <IoPersonOutline />
                 </span>
-                <span>Username</span>
+                <span>Admin Username</span>
               </label>
               <input
                 type="text"
@@ -124,7 +132,7 @@ const LoginPage = () => {
                 className={`border rounded-full py-3 px-4 w-full ${
                   formErrors.username ? "border-red-500" : "border-[#33333399]"
                 }`}
-                placeholder="Enter your username"
+                placeholder="Enter admin username"
               />
               {formErrors.username && (
                 <p className="text-red-500 text-sm mt-1">
@@ -152,7 +160,7 @@ const LoginPage = () => {
                 className={`border rounded-full py-3 px-4 w-full ${
                   formErrors.password ? "border-red-500" : "border-[#33333399]"
                 }`}
-                placeholder="Enter your password"
+                placeholder="Enter admin password"
               />
               {formErrors.password && (
                 <p className="text-red-500 text-sm mt-1">
@@ -161,35 +169,26 @@ const LoginPage = () => {
               )}
             </div>
 
-            <div className="flex justify-end">
-              <Link
-                href="/signup-verification"
-                className="text-blue-600 text-sm font-normal font-['Poppins'] hover:underline"
-              >
-                Need your credentials resent?
-              </Link>
-            </div>
-
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-10 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-10 cursor-pointer self-stretch h-16 relative bg-red-600 hover:bg-red-700 text-white border border-red-600 rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-center justify-center text-xl font-normal font-['Poppins']">
-                {isLoading ? "Logging in..." : "Log in"}
+                {isLoading ? "Logging in..." : "Admin Login"}
               </span>
             </button>
           </form>
 
           <p className="mt-13 justify-start">
             <span className="text-zinc-800 text-lg font-medium font-['Poppins']">
-              Don't have an account?{" "}
+              User portal?{" "}
             </span>
             <Link
-              href="/signup"
+              href="/login"
               className="text-blue-600 text-lg font-bold font-['Poppins']"
             >
-              Sign up
+              User Login
             </Link>
           </p>
         </div>
@@ -198,4 +197,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AdminLoginPage;

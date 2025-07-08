@@ -1,16 +1,22 @@
+// components/admin/ImageUploader.tsx
 "use client";
 
 import { useState, DragEvent, ChangeEvent } from "react";
 import UploadIcon from "@/assets/UploadIcon";
 import Image from "next/image";
 
-const ImageUploader = () => {
+interface Props {
+  onFileSelect: (file: File | null) => void;
+}
+
+const ImageUploader = ({ onFileSelect }: Props) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const handleFile = (file: File) => {
     if (file && file.type.startsWith("image/")) {
       const url = URL.createObjectURL(file);
       setImageUrl(url);
+      onFileSelect(file);
     } else {
       alert("Only image files are allowed.");
     }

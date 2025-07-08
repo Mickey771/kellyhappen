@@ -15,10 +15,12 @@ const SignupVerification = () => {
 
   const [email, setEmail] = useState("");
   const [maskedEmail, setMaskedEmail] = useState("");
+  const [countdown, setCountdown] = useState(0);
+  const [canResend, setCanResend] = useState(true);
 
   useEffect(() => {
     // Get email from router query or localStorage
-    const userEmail = query || localStorage.getItem("userEmail");
+    const userEmail = (query as string) || localStorage.getItem("userEmail");
 
     if (!userEmail) {
       router.push("/signup");
@@ -28,10 +30,39 @@ const SignupVerification = () => {
     setEmail(userEmail);
     setMaskedEmail(maskEmail(userEmail));
 
+    // Start countdown on component mount
+    startCountdown();
+
     return () => {
       dispatch(clearError());
     };
   }, [router, dispatch]);
+
+  // Countdown effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            setCanResend(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [countdown]);
+
+  const startCountdown = () => {
+    setCountdown(60); // 1 minute
+    setCanResend(false);
+  };
 
   const maskEmail = (email: string): string => {
     const [localPart, domain] = email.split("@");
@@ -41,11 +72,12 @@ const SignupVerification = () => {
   };
 
   const handleResend = async () => {
-    if (!email) return;
+    if (!email || !canResend) return;
 
     try {
       await dispatch(resendCredentials(email)).unwrap();
       alert("New credentials sent to your email!");
+      startCountdown(); // Start countdown after successful resend
     } catch (error) {
       // Error handled by Redux
     }
@@ -91,16 +123,26 @@ const SignupVerification = () => {
             <span className="text-[#333] text-lg font-normal font-['Poppins']">
               Haven't received an email?
             </span>
+            {!canResend && countdown > 0 && (
+              <span className="block text-sm text-gray-500 mt-2">
+                You can resend in {Math.floor(countdown / 60)}:
+                {(countdown % 60).toString().padStart(2, "0")}
+              </span>
+            )}
           </p>
 
           <button
             type="button"
             onClick={handleResend}
-            disabled={isLoading}
+            disabled={isLoading || !canResend}
             className="w-full mt-5 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="text-center justify-center text-xl font-normal font-['Poppins']">
-              {isLoading ? "Sending..." : "Resend Credentials"}
+              {isLoading
+                ? "Sending..."
+                : canResend
+                ? "Resend Credentials"
+                : `Wait ${countdown}s`}
             </span>
           </button>
 

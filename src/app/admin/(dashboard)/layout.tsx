@@ -1,8 +1,15 @@
+"use client";
 import AdminSidebar from "@/components/layout/AdminSidebar";
 import Header from "@/components/layout/Header";
+import { useAppSelector } from "@/store/store";
+import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated } = useAppSelector((store) => store.adminAuth);
+  if (!isAuthenticated) {
+    return redirect("/admin/login");
+  }
   return (
     <div className="h-screen flex">
       {/* Sidebar */}
