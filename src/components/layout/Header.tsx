@@ -68,8 +68,8 @@ const Header = () => {
           </div>
 
           <div className="w-full justify-end flex items-center gap-5">
-            <NotificationIcon />
-            <div className="flex items-center gap-4">
+            {/* <NotificationIcon /> */}
+            {/* <div className="flex items-center gap-4">
               <div className="rounded-full w-10 h-7">
                 <Image
                   alt="avatar"
@@ -85,7 +85,7 @@ const Header = () => {
                 </h3>
               </div>
               <ChevronDown size={16} />
-            </div>
+            </div> */}
             <div className="flex items-center gap-3">
               <div className="rounded-full size-12">
                 <Image

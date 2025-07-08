@@ -9,51 +9,48 @@ import {
   WalletRainbow,
   WalletArgent,
 } from "@web3icons/react";
-import { Calendar, ChevronDown, X } from "lucide-react";
-import classNames from "react-day-picker/style.module.css";
+import { ChevronDown, X } from "lucide-react";
 import {
-  ComponentType,
   Dispatch,
   ReactNode,
   SetStateAction,
   useState,
+  useEffect,
 } from "react";
 import { useForm } from "react-hook-form";
-import { DayPicker } from "react-day-picker";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DropdownMenu, DropdownMenuContent } from "@/components/ui/dropdown";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+
 const schema = z.object({
-  name: z.string().min(0, "Name cannot be negative"),
-  phone: z.string().min(0, "Name cannot be negative"),
-  address: z.string().min(0, "Name cannot be negative"),
+  walletAddress: z.string().min(1, "Wallet address is required"),
 });
 
-const web3Options = [
+const networkOptions = [
   {
-    name: "Bitcoin",
+    name: "TRC20 (Tron)",
     Icon: <TokenBTC size={24} variant="branded" />,
   },
   {
-    name: "MetaMask",
+    name: "ERC20 (Ethereum)",
     Icon: <WalletMetamask size={24} variant="branded" />,
   },
   {
-    name: "Coinbase Wallet",
+    name: "BEP20 (BSC)",
     Icon: <WalletCoinbase size={24} variant="branded" />,
   },
-
   {
-    name: "Trust Wallet",
+    name: "Polygon",
     Icon: <WalletTrust size={24} variant="branded" />,
   },
   {
-    name: "Rainbow",
+    name: "Arbitrum",
     Icon: <WalletRainbow size={24} variant="branded" />,
   },
   {
-    name: "Argent",
+    name: "Optimism",
     Icon: <WalletArgent size={24} variant="branded" />,
   },
 ];
@@ -62,44 +59,71 @@ type FormData = z.infer<typeof schema>;
 
 interface Props {
   setShow: Dispatch<SetStateAction<boolean>>;
+  user: any;
 }
-interface WalletOption {
+
+interface NetworkOption {
   name: string;
   Icon: ReactNode;
 }
-const WalletInformation = ({ setShow }: Props) => {
-  const [selectedWallet, setSelectedWallet] = useState<WalletOption>(
-    web3Options[0]
+
+const WalletInformation = ({ setShow, user }: Props) => {
+  const dispatch = useAppDispatch();
+  const { isLoading } = useAppSelector((state) => state.admin);
+
+  const [selectedNetwork, setSelectedNetwork] = useState<NetworkOption>(
+    networkOptions.find((n) => n.name === user.walletNetwork) ||
+      networkOptions[0]
   );
-  const [open, setOpen] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      walletAddress: user.walletAddress || "",
+    },
   });
 
-  const formatDayMonth = (date: Date | undefined): string => {
-    if (!date) return "";
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
+  const onSubmit = async (data: FormData) => {
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}/wallet`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletAddress: data.walletAddress,
+          walletNetwork: selectedNetwork.name,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert("Wallet information updated successfully!");
+        setShow(false);
+      } else {
+        alert("Failed to update wallet information");
+      }
+    } catch (error) {
+      alert("Failed to update wallet information");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
       month: "short",
-      year: "numeric", // use 'long' for full month name
+      day: "numeric",
     });
   };
 
-  const onSubmit = (data: FormData) => {
-    console.log("Debit data:", data);
-    // Submit logic here
-    setShow(false);
-  };
   return (
     <article className="fixed inset-0 bg-black/30 z-9999 flex justify-center items-center">
       <section className="w-full max-w-2xl py-6 max-h-9/10 scrollbar-hide overflow-y-auto bg-white rounded-lg">
         <div className="flex items-center justify-between border-b border-[#2e5163] px-6 pb-4">
           <h2 className="text-lg font-medium text-[#191B1C]">
-            Wallet Information
+            User Wallet Information
           </h2>
           <div
             onClick={() => setShow(false)}
@@ -108,39 +132,79 @@ const WalletInformation = ({ setShow }: Props) => {
             <X size={20} />
           </div>
         </div>
+
+        {/* User Information Display */}
+        <div className="px-6 py-4 bg-gray-50 border-b">
+          <h3 className="font-medium text-[#191B1C] mb-3">User Details</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-600">Username:</span>
+              <p className="text-[#191B1C]">{user.username}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Email:</span>
+              <p className="text-[#191B1C]">{user.email || "Not provided"}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Phone:</span>
+              <p className="text-[#191B1C]">{user.phone}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Balance:</span>
+              <p className="text-[#191B1C]">${user.balance}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Level:</span>
+              <p className="text-[#191B1C]">
+                {user.level === 1 ? "Beginner" : "Premium"}
+              </p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">
+                Completed Tasks:
+              </span>
+              <p className="text-[#191B1C]">{user.completedTasks}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Country:</span>
+              <p className="text-[#191B1C]">{user.country || "Not provided"}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Member Since:</span>
+              <p className="text-[#191B1C]">{formatDate(user.createdAt)}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Wallet Information Form */}
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-4 mt-6 px-6 pt-4"
         >
+          <h3 className="font-medium text-[#191B1C] mb-4">
+            Edit Wallet Information
+          </h3>
+
           <CustomInput
             kind="input"
-            label="Name"
-            placeholder="Gregory Forman"
+            label="Wallet Address"
+            placeholder="Enter wallet address"
             register={register}
             errors={errors}
-            name="name"
-            type="text"
-          />
-          <CustomInput
-            kind="input"
-            label="Recipient’s Address"
-            placeholder="lkjsdnpakerpgaioue8-983-5qnpdir;gaj;ajkbnpodn[poiser[vn[oithaob[ih[bn"
-            register={register}
-            errors={errors}
-            name="address"
+            name="walletAddress"
             type="text"
           />
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="wallet" className="text-sm  text-[#191B1C]">
+            <label htmlFor="network" className="text-sm text-[#191B1C]">
               Payment Network
             </label>
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <div className="w-full border-[#E5E7E8] border flex items-center justify-between  rounded px-4 py-2 bg-white shadow">
+                <div className="w-full border-[#E5E7E8] border flex items-center justify-between rounded px-4 py-2 bg-white shadow">
                   <div className="flex items-center gap-2">
-                    {selectedWallet.Icon}
-                    <span>{selectedWallet.name}</span>
+                    {selectedNetwork.Icon}
+                    <span>{selectedNetwork.name}</span>
                   </div>
                   <span className="text-gray-500">
                     <ChevronDown />
@@ -152,30 +216,41 @@ const WalletInformation = ({ setShow }: Props) => {
                 className="z-[9999] w-full shadow border-[#E5E7E8] border bg-white"
               >
                 <ul>
-                  {web3Options.map((wallet) => (
+                  {networkOptions.map((network) => (
                     <li
-                      key={wallet.name}
-                      onClick={() => setSelectedWallet(wallet)}
+                      key={network.name}
+                      onClick={() => setSelectedNetwork(network)}
                       className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
-                      {wallet.Icon}
-                      <span>{wallet.name}</span>
+                      {network.Icon}
+                      <span>{network.name}</span>
                     </li>
                   ))}
                 </ul>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <CustomInput
-            kind="input"
-            label="Recipient’s Phone Number"
-            placeholder="+144 567 876 6789"
-            register={register}
-            errors={errors}
-            name="phone"
-            type="text"
-          />
-          <div className="flex col-span-2 justify-between items-center">
+
+          {/* Current Wallet Info */}
+          {(user.walletAddress || user.walletNetwork) && (
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-800 mb-2">
+                Current Wallet Info
+              </h4>
+              <div className="text-sm space-y-1">
+                <p>
+                  <span className="font-medium">Network:</span>{" "}
+                  {user.walletNetwork || "Not set"}
+                </p>
+                <p>
+                  <span className="font-medium">Address:</span>{" "}
+                  {user.walletAddress || "Not set"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex col-span-2 justify-between items-center pt-4">
             <button
               type="button"
               onClick={() => setShow(false)}
@@ -183,8 +258,12 @@ const WalletInformation = ({ setShow }: Props) => {
             >
               Cancel
             </button>
-            <button className="text-center text-white cursor-pointer bg-[#A69F93] rounded-[160px] px-5 text-sm font-semibold py-3">
-              Edit Information
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="text-center text-white cursor-pointer bg-[#A69F93] rounded-[160px] px-5 text-sm font-semibold py-3 disabled:opacity-50"
+            >
+              {isLoading ? "Updating..." : "Update Wallet"}
             </button>
           </div>
         </form>

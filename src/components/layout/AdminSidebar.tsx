@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Info, Power, Settings } from "lucide-react";
 import DashboardIcon from "@/assets/DashboardIcon";
 import DashboardIcon2 from "@/assets/DashboardIcon2";
 import { AiOutlineProduct } from "react-icons/ai";
+import { useAppDispatch } from "@/store/store";
+import { adminLogout } from "@/store/reducers/adminAuthSlice";
 
 export const adminSidebar = [
   {
@@ -15,48 +17,48 @@ export const adminSidebar = [
     name: "Dashboard",
     href: "/admin/dashboard",
   },
-  {
-    activeIcon: <Info />,
-    icon: <Info />,
-    name: "Inbox",
-    href: "/admin/inbox",
-  },
-  {
-    activeIcon: (
-      <div>
-        <svg
-          width="24"
-          height="24"
-          fill="none"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M14.75 15c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297-2.91 0-4.567-1.09-4.567-3.259v-1c0-.966.784-1.75 1.75-1.75h5.5Zm-11-5h4.376a4.007 4.007 0 0 0 1.067 3.85l.162.151L9.25 14a2.75 2.75 0 0 0-2.649 2.008l-.034.001C3.657 16.009 2 14.919 2 12.75v-1c0-.966.784-1.75 1.75-1.75Zm16.5 0c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297l-.169-.002a2.756 2.756 0 0 0-2.451-2L14.75 14l-.105.001a3.99 3.99 0 0 0 1.229-4L20.25 10ZM12 8a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM6.5 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm11 0a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"
-            fill="#ffffff"
-          />
-        </svg>
-      </div>
-    ),
-    icon: (
-      <div>
-        <svg
-          width="24"
-          height="24"
-          fill="#33333399"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M14.75 15c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297-2.91 0-4.567-1.09-4.567-3.259v-1c0-.966.784-1.75 1.75-1.75h5.5Zm-11-5h4.376a4.007 4.007 0 0 0 1.067 3.85l.162.151L9.25 14a2.75 2.75 0 0 0-2.649 2.008l-.034.001C3.657 16.009 2 14.919 2 12.75v-1c0-.966.784-1.75 1.75-1.75Zm16.5 0c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297l-.169-.002a2.756 2.756 0 0 0-2.451-2L14.75 14l-.105.001a3.99 3.99 0 0 0 1.229-4L20.25 10ZM12 8a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM6.5 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm11 0a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"
-            fill="#33333399"
-          />
-        </svg>
-      </div>
-    ),
-    name: "Members List",
-    href: "/admin/members",
-  },
+  // {
+  //   activeIcon: <Info />,
+  //   icon: <Info />,
+  //   name: "Inbox",
+  //   href: "/admin/inbox",
+  // },
+  // {
+  //   activeIcon: (
+  //     <div>
+  //       <svg
+  //         width="24"
+  //         height="24"
+  //         fill="none"
+  //         viewBox="0 0 24 24"
+  //         xmlns="http://www.w3.org/2000/svg"
+  //       >
+  //         <path
+  //           d="M14.75 15c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297-2.91 0-4.567-1.09-4.567-3.259v-1c0-.966.784-1.75 1.75-1.75h5.5Zm-11-5h4.376a4.007 4.007 0 0 0 1.067 3.85l.162.151L9.25 14a2.75 2.75 0 0 0-2.649 2.008l-.034.001C3.657 16.009 2 14.919 2 12.75v-1c0-.966.784-1.75 1.75-1.75Zm16.5 0c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297l-.169-.002a2.756 2.756 0 0 0-2.451-2L14.75 14l-.105.001a3.99 3.99 0 0 0 1.229-4L20.25 10ZM12 8a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM6.5 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm11 0a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"
+  //           fill="#ffffff"
+  //         />
+  //       </svg>
+  //     </div>
+  //   ),
+  //   icon: (
+  //     <div>
+  //       <svg
+  //         width="24"
+  //         height="24"
+  //         fill="#33333399"
+  //         viewBox="0 0 24 24"
+  //         xmlns="http://www.w3.org/2000/svg"
+  //       >
+  //         <path
+  //           d="M14.75 15c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297-2.91 0-4.567-1.09-4.567-3.259v-1c0-.966.784-1.75 1.75-1.75h5.5Zm-11-5h4.376a4.007 4.007 0 0 0 1.067 3.85l.162.151L9.25 14a2.75 2.75 0 0 0-2.649 2.008l-.034.001C3.657 16.009 2 14.919 2 12.75v-1c0-.966.784-1.75 1.75-1.75Zm16.5 0c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297l-.169-.002a2.756 2.756 0 0 0-2.451-2L14.75 14l-.105.001a3.99 3.99 0 0 0 1.229-4L20.25 10ZM12 8a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM6.5 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm11 0a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"
+  //           fill="#33333399"
+  //         />
+  //       </svg>
+  //     </div>
+  //   ),
+  //   name: "Members List",
+  //   href: "/admin/members",
+  // },
   {
     activeIcon: <AiOutlineProduct size={20} />,
     icon: <AiOutlineProduct size={20} />,
@@ -66,11 +68,11 @@ export const adminSidebar = [
 ];
 
 export const adminBottomLinks = [
-  {
-    name: "Settings",
-    href: "/admin/settings",
-    icon: <Settings />,
-  },
+  // {
+  //   name: "Settings",
+  //   href: "/admin/settings",
+  //   icon: <Settings />,
+  // },
   {
     name: "Logout",
     href: "/admin/logout",
@@ -80,14 +82,44 @@ export const adminBottomLinks = [
 
 const AdminSidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(adminLogout()).unwrap();
+      router.push("/admin/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Force redirect even if API call fails
+      router.push("/admin/login");
+    }
+  };
 
   const renderLink = (
     href: string,
     name: string,
     icon: React.ReactNode,
-    activeIcon?: React.ReactNode
+    activeIcon?: React.ReactNode,
+    onClick?: () => void
   ) => {
     const isActive = pathname === href;
+
+    if (onClick) {
+      return (
+        <button
+          key={name}
+          onClick={onClick}
+          className="flex gap-4 w-full rounded-md text-sm font-medium transition h-13"
+        >
+          <div className="w-2 h-12 rounded-r-md" />
+          <div className="flex w-full px-4 items-center gap-3 h-12 rounded-md text-sm font-medium transition text-[#A69F93] hover:bg-[#A69F9325]">
+            {icon}
+            {name}
+          </div>
+        </button>
+      );
+    }
 
     return (
       <Link
@@ -135,9 +167,7 @@ const AdminSidebar = () => {
         </article>
 
         <article className="pr-4">
-          {adminBottomLinks.map(({ name, href, icon }) =>
-            renderLink(href, name, icon)
-          )}
+          {renderLink("", "Logout", <Power />, undefined, handleLogout)}
         </article>
       </section>
     </aside>

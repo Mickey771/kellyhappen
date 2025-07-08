@@ -3,12 +3,14 @@ import authReducer from "./authSlice";
 import adminAuthReducer from "./adminAuthSlice";
 import userReducer from "./userSlice";
 import adminProductReducer from "./adminProductSlice";
+import adminReducer from "./adminSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
   adminAuth: adminAuthReducer,
   adminProduct: adminProductReducer,
+  admin: adminReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

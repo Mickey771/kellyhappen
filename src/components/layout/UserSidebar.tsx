@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CiWallet } from "react-icons/ci";
 import { AiOutlineAntDesign } from "react-icons/ai";
 import { SiProgress } from "react-icons/si";
@@ -18,11 +18,15 @@ import {
   PanelRightOpen,
   PanelRightClose,
   Wallet,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 import BeginnerIcon from "@/assets/BeginnerIcon";
 import InviteIcon from "@/assets/InviteIcon";
 import InviteIcon2 from "@/assets/InviteIcon2";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import { logout } from "@/store/reducers/authSlice";
+
 const sidebar = [
   {
     activeIcon: <House />,
@@ -74,7 +78,7 @@ const menuItems = [
     activeIcon: <File />,
     icon: <File />,
     name: "Terms & Conditions",
-    href: "/user/info",
+    href: "/user/terms",
   },
   {
     activeIcon: (
@@ -177,23 +181,39 @@ const menuItems = [
 
 const UserSidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+
   const [open, setOpen] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      router.push("/login");
+    } catch (error) {
+      router.push("/login");
+    }
+  };
+
   return (
     <>
       <header className="md:hidden ">
         <div className="flex p-4 justify-between w-full items-center cursor-pointer">
           <div className="flex gap-3 items-center">
             <Image
-              src="/images/avatar30.svg" // Replace with your actual avatar path
+              src="/images/avatar30.svg"
               alt="User"
               width={40}
               height={40}
               className="rounded-md object-cover"
             />
             <div>
-              <h4 className="font-bold text-[#2A2A2A]">Guy Hawkins</h4>
+              <h4 className="font-bold text-[#2A2A2A]">
+                {user?.username || "User"}
+              </h4>
               <p className="text-sm text-[#727272]">Designer</p>
             </div>
           </div>
@@ -268,7 +288,7 @@ const UserSidebar = () => {
               >
                 <div className="flex gap-3 flex-row-reverse items-center">
                   <Image
-                    src="/images/avatar30.svg" // Replace with your actual avatar path
+                    src="/images/avatar30.svg"
                     alt="User"
                     width={40}
                     height={40}
@@ -276,13 +296,14 @@ const UserSidebar = () => {
                   />
                   <div>
                     <p className="text-sm text-gray-500">Designer</p>
-                    <h4 className="font-medium text-gray-900">Guy Hawkins</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {user?.username || "User"}
+                    </h4>
                   </div>
                 </div>
                 {open ? <ChevronUp /> : <ChevronDown />}
               </div>
 
-              {/* Divider and List */}
               {open && (
                 <ul className="mt-4 ">
                   {menuItems.map(({ icon, name, href, activeIcon }, index) => {
@@ -295,10 +316,6 @@ const UserSidebar = () => {
                         onClick={() => setShowSidebar(false)}
                         className="flex justify-end items-center rounded-l-[1px] border-[#D1D1D1]  gap-3 text-sm text-gray-600 cursor-pointer "
                       >
-                        {/* Left line for first 5 items */}
-
-                        {/* Left line for first 5 items */}
-
                         <div
                           className={`${
                             isActive
@@ -314,6 +331,17 @@ const UserSidebar = () => {
                       </Link>
                     );
                   })}
+
+                  {/* Logout Button */}
+                  <button
+                    onClick={handleLogout}
+                    className="flex justify-end items-center w-full rounded-l-[1px] border-[#D1D1D1] gap-3 text-sm text-gray-600 cursor-pointer"
+                  >
+                    <div className="text-[#888888] hover:bg-[#A69F9325] flex items-center w-full p-2 rounded-[12px] gap-2">
+                      <LogOut />
+                      <p className="text-sm py-[10px] leading-[150%]">Logout</p>
+                    </div>
+                  </button>
                 </ul>
               )}
             </section>
@@ -321,12 +349,11 @@ const UserSidebar = () => {
         </>
       )}
 
-      {/* //desktop  */}
-
+      {/* Desktop */}
       <aside
         className={`${
           sidebarOpen ? "w-full md:w-70 xl:w-80" : "w-30"
-        } bg-white scrollbar-hide overflow-y-auto border-r border-gray-200`}
+        } bg-white scrollbar-hide overflow-y-auto border-r border-gray-200 pb-10`}
       >
         <section className="hidden md:flex flex-col  justify-between">
           <article className="flex px-4 items-center gap-4">
@@ -400,7 +427,8 @@ const UserSidebar = () => {
               })}
             </div>
           </section>
-          {/* user profile  */}
+
+          {/* User Profile */}
           <section className="mt-[45px] px-4 py-2 rounded-[12px] mx-4 border shadow-sm border-[#E7E7E7]">
             <div
               className="flex justify-between items-center cursor-pointer"
@@ -408,7 +436,7 @@ const UserSidebar = () => {
             >
               <div className="flex gap-3 items-center">
                 <Image
-                  src="/images/avatar30.svg" // Replace with your actual avatar path
+                  src="/images/avatar30.svg"
                   alt="User"
                   width={40}
                   height={40}
@@ -416,7 +444,9 @@ const UserSidebar = () => {
                 />
                 {sidebarOpen && (
                   <div>
-                    <h4 className="font-medium text-gray-900">Guy Hawkins</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {user?.username || "User"}
+                    </h4>
                     <p className="text-sm text-gray-500">Designer</p>
                   </div>
                 )}
@@ -424,7 +454,6 @@ const UserSidebar = () => {
               {open ? <ChevronUp /> : <ChevronDown />}
             </div>
 
-            {/* Divider and List */}
             {open && (
               <ul className="mt-4 ">
                 {menuItems.map(({ icon, name, activeIcon, href }, index) => {
@@ -438,9 +467,6 @@ const UserSidebar = () => {
                         sidebarOpen ? "border-l" : "border-none"
                       } flex  items-center rounded-l-[1px] border-[#D1D1D1]  gap-3 text-sm text-gray-600 cursor-pointer `}
                     >
-                      {/* Left line for first 5 items */}
-
-                      {/* Left line for first 5 items */}
                       {sidebarOpen && (
                         <span className="h-px w-4 bg-gray-300 block " />
                       )}
@@ -463,6 +489,25 @@ const UserSidebar = () => {
                     </Link>
                   );
                 })}
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className={`${
+                    sidebarOpen ? "border-l" : "border-none"
+                  } flex items-center rounded-l-[1px] border-[#D1D1D1] gap-3 text-sm text-gray-600 cursor-pointer w-full`}
+                >
+                  {sidebarOpen && (
+                    <span className="h-px w-4 bg-gray-300 block " />
+                  )}
+
+                  <div className="text-[#888888] hover:bg-[#A69F9325] flex items-center w-full p-2 rounded-[12px] gap-2">
+                    <LogOut />
+                    {sidebarOpen && (
+                      <p className="text-sm py-[10px] leading-[150%]">Logout</p>
+                    )}
+                  </div>
+                </button>
               </ul>
             )}
           </section>

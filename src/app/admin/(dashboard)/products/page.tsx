@@ -13,9 +13,12 @@ import {
 import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { FaArrowsAltH } from "react-icons/fa";
 import CreateProduct from "./components/CreateProduct";
+import EditProduct from "./components/EditProduct";
 import BottomPagination from "@/components/admin/dashboard/BottomPagination";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchProducts, clearError } from "@/store/reducers/adminProductSlice";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 const rows = [
   "Product ID",
@@ -31,7 +34,13 @@ const ProductsPage = () => {
     (state) => state.adminProduct
   );
   const [createProduct, setCreateProduct] = useState(false);
+  const [editProduct, setEditProduct] = useState<any>(null);
   const [pageNum, setPageNum] = useState(1);
+  const [filters, setFilters] = useState({
+    priceFilter: "",
+    dateRange: { start: "", end: "" },
+    searchTerm: "",
+  });
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -40,6 +49,43 @@ const ProductsPage = () => {
       dispatch(clearError());
     };
   }, [dispatch]);
+
+  const filteredProducts = products.filter((product) => {
+    // Price filter
+    if (filters.priceFilter === "highest") {
+      return product.price >= 100; // Adjust threshold as needed
+    }
+    if (filters.priceFilter === "lowest") {
+      return product.price < 100;
+    }
+
+    // Date range filter
+    if (filters.dateRange.start && filters.dateRange.end) {
+      const productDate = new Date(product.createdAt);
+      const startDate = new Date(filters.dateRange.start);
+      const endDate = new Date(filters.dateRange.end);
+      if (productDate < startDate || productDate > endDate) {
+        return false;
+      }
+    }
+
+    // Search term filter
+    if (filters.searchTerm) {
+      return product.name
+        .toLowerCase()
+        .includes(filters.searchTerm.toLowerCase());
+    }
+
+    return true;
+  });
+
+  const clearFilters = () => {
+    setFilters({
+      priceFilter: "",
+      dateRange: { start: "", end: "" },
+      searchTerm: "",
+    });
+  };
 
   if (isLoading && products.length === 0) {
     return <div className="flex justify-center py-8">Loading products...</div>;
@@ -57,22 +103,87 @@ const ProductsPage = () => {
 
       <div className="my-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <article className="flex items-center flex-wrap gap-4 w-full">
-          <div className="border border-[#413B89] shadow text-[#2222224D] text-sm w-full bg-white px-4 rounded-[30px] max-w-[207px] h-11 flex items-center ">
+          <button
+            onClick={() =>
+              setFilters((prev) => ({
+                ...prev,
+                priceFilter: prev.priceFilter === "highest" ? "" : "highest",
+              }))
+            }
+            className={`border shadow text-sm w-full bg-white px-4 rounded-[30px] max-w-[207px] h-11 flex items-center ${
+              filters.priceFilter === "highest"
+                ? "border-[#413B89] text-[#413B89]"
+                : "border-[#EBEBEE] text-[#2222224D]"
+            }`}
+          >
             Highest Price
-          </div>
-          <div className="border border-[#EBEBEE] shadow text-[#2222224D] text-sm w-full bg-white px-4 rounded-[30px] max-w-[207px] h-11 flex items-center ">
+          </button>
+          <button
+            onClick={() =>
+              setFilters((prev) => ({
+                ...prev,
+                priceFilter: prev.priceFilter === "lowest" ? "" : "lowest",
+              }))
+            }
+            className={`border shadow text-sm w-full bg-white px-4 rounded-[30px] max-w-[207px] h-11 flex items-center ${
+              filters.priceFilter === "lowest"
+                ? "border-[#413B89] text-[#413B89]"
+                : "border-[#EBEBEE] text-[#2222224D]"
+            }`}
+          >
             Lowest Price
-          </div>
-          <p>Registration Date</p>
-          <div className="w-full bg-white text-[#2222224D] gap-4 px-4 border shadow border-[#EBEBEE]  rounded-[30px] max-w-[290px] h-11 flex items-center ">
-            <p>Start Date</p>
+          </button>
+
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={filters.searchTerm}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))
+            }
+            className="border border-[#EBEBEE] shadow bg-white px-4 rounded-[30px] max-w-[200px] h-11"
+          />
+
+          <div className="w-full bg-white text-[#2222224D] gap-4 px-4 border shadow border-[#EBEBEE] rounded-[30px] max-w-[290px] h-11 flex items-center">
+            <input
+              type="date"
+              value={filters.dateRange.start}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  dateRange: { ...prev.dateRange, start: e.target.value },
+                }))
+              }
+              className="text-xs border-none outline-none"
+            />
             <FaArrowsAltH />
-            <p>End Date</p>
+            <input
+              type="date"
+              value={filters.dateRange.end}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  dateRange: { ...prev.dateRange, end: e.target.value },
+                }))
+              }
+              className="text-xs border-none outline-none"
+            />
             <Calendar />
           </div>
+
+          {(filters.priceFilter ||
+            filters.dateRange.start ||
+            filters.searchTerm) && (
+            <button
+              onClick={clearFilters}
+              className="text-sm text-red-600 hover:underline"
+            >
+              Clear Filters
+            </button>
+          )}
         </article>
         <button
-          className="w-full bg-[#A69F93] text-white cursor-pointer px-4 rounded-[30px] text-sm font-medium max-w-[148px] h-11 flex items-center "
+          className="w-full bg-[#A69F93] text-white cursor-pointer px-4 rounded-[30px] text-sm font-medium max-w-[148px] h-11 flex justify-center items-center "
           onClick={() => setCreateProduct(true)}
         >
           Create Product
@@ -93,8 +204,13 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {products.map((product, i) => (
-                <ProductTable product={product} key={product.id} i={i} />
+              {filteredProducts.map((product, i) => (
+                <ProductTable
+                  product={product}
+                  key={product.id}
+                  i={i}
+                  onEdit={() => setEditProduct(product)}
+                />
               ))}
             </tbody>
           </table>
@@ -104,9 +220,16 @@ const ProductsPage = () => {
       <BottomPagination
         pageNum={pageNum}
         setPageNum={setPageNum}
-        max={Math.ceil(products.length / 10)}
+        max={Math.ceil(filteredProducts.length / 10)}
       />
+
       {createProduct && <CreateProduct setCreate={setCreateProduct} />}
+      {editProduct && (
+        <EditProduct
+          setEdit={() => setEditProduct(null)}
+          product={editProduct}
+        />
+      )}
     </main>
   );
 };
@@ -114,14 +237,11 @@ const ProductsPage = () => {
 interface ProductTableProps {
   product: any;
   i: number;
+  onEdit: () => void;
 }
 
-const ProductTable = ({ product, i }: ProductTableProps) => {
+const ProductTable = ({ product, i, onEdit }: ProductTableProps) => {
   const [open, setOpen] = useState(false);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
 
   const getStatusColor = (isActive: boolean, endDate: string) => {
     if (!isActive) return "text-red-600 bg-red-100";
@@ -146,7 +266,7 @@ const ProductTable = ({ product, i }: ProductTableProps) => {
       <td className="px-4 py-3 flex items-center gap-2">
         {product.image && (
           <img
-            src={product.image}
+            src={`${BASE_URL}${product.image}`}
             alt={product.name}
             className="w-8 h-8 rounded object-cover"
           />
@@ -184,7 +304,10 @@ const ProductTable = ({ product, i }: ProductTableProps) => {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem className="text-sm font-medium flex justify-center cursor-pointer bg-[#F3F4F6] text-[#333333CC] hover:text-white hover:bg-[#A69F93]">
+              <DropdownMenuItem
+                onClick={onEdit}
+                className="text-sm font-medium flex justify-center cursor-pointer bg-[#F3F4F6] text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
+              >
                 Edit Product
               </DropdownMenuItem>
               <DropdownMenuSeparator />

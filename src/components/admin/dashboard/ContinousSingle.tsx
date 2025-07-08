@@ -1,24 +1,106 @@
-import { Calendar, ChevronDown, MoveRight, X } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+// components/admin/ContinuousSingle.tsx
+"use client";
+import { Calendar, MoveRight, X } from "lucide-react";
+import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import { setUserNegativeOverride } from "@/store/reducers/adminSlice";
+import { fetchProducts } from "@/store/reducers/adminProductSlice";
 
-interface ContinousSingleProps {
+interface ContinuousSingleProps {
   setContinousSingle: Dispatch<SetStateAction<boolean>>;
+  user: any;
 }
 
-const ContinousSingle = ({ setContinousSingle }: ContinousSingleProps) => {
+const schema = z.object({
+  negativeAmount: z
+    .number({ invalid_type_error: "Amount must be a number" })
+    .min(0, "Amount cannot be negative"),
+  applyToAll: z.boolean(),
+});
+
+type FormData = z.infer<typeof schema>;
+
+const ContinuousSingle = ({
+  setContinousSingle,
+  user,
+}: ContinuousSingleProps) => {
+  const dispatch = useAppDispatch();
+  const { products } = useAppSelector((state) => state.adminProduct);
+  const { isLoading } = useAppSelector((state) => state.admin);
+
   const [showProducts, setShowProducts] = useState(false);
-  const products = [
-    { title: "Sofa Classic Interiors", price: "50.99" },
-    { title: "Sofa Classic Interiors", price: "50.99" },
-    { title: "Sofa Classic Interiors", price: "50.99" },
-  ];
-  const handleReset = () => {};
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      applyToAll: true,
+      negativeAmount: 0,
+    },
+  });
+
+  const applyToAll = watch("applyToAll");
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      const productIds = data.applyToAll
+        ? products.map((p) => p.id)
+        : selectedProducts;
+
+      if (!data.applyToAll && selectedProducts.length === 0) {
+        alert("Please select at least one product");
+        return;
+      }
+
+      await dispatch(
+        setUserNegativeOverride({
+          userId: user.id,
+          productIds,
+          negativeAmount: data.negativeAmount,
+        })
+      ).unwrap();
+
+      alert("Negative amount override set successfully!");
+      setContinousSingle(false);
+    } catch (error) {
+      // Error handled by Redux
+    }
+  };
+
+  const toggleProductSelection = (productId: number) => {
+    setSelectedProducts((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const selectAllProducts = () => {
+    setSelectedProducts(products.map((p) => p.id));
+  };
+
+  const clearSelection = () => {
+    setSelectedProducts([]);
+  };
+
   return (
     <article className="fixed inset-0 bg-black/30 z-9999 flex justify-center items-center">
-      <section className="w-full max-w-2xl py-6 h-9/10 scrollbar-hide overflow-y-auto bg-white rounded-lg">
+      <section className="w-full max-w-2xl py-6 max-h-9/10 scrollbar-hide overflow-y-auto bg-white rounded-lg">
         <div className="px-6 pb-4 border-b border-[#2e5163] flex items-center justify-between">
           <h2 className="text-lg font-medium text-[#191B1C]">
-            Set Continuous Single
+            Set Negative Amount Override
           </h2>
           <div
             onClick={() => setContinousSingle(false)}
@@ -27,365 +109,142 @@ const ContinousSingle = ({ setContinousSingle }: ContinousSingleProps) => {
             <X size={20} />
           </div>
         </div>
-        <article className="p-6 space-y-4">
-          {/* separatro */}
-          <div className="flex justify-between gap-6">
-            <div className="w-full flex flex-col gap-1">
-              <label className="text-[#191B1C] text-sm">
-                Current number of orders made
-              </label>
-              <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-                0
-              </p>
-            </div>
-            {/* Orders received today */}
-            <div className="flex w-full  flex-col gap-1">
-              <label className="text-[#191B1C] text-sm">
-                Orders received today
-              </label>
-              <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-                15
-              </p>
-            </div>
-          </div>
-          {/* Maximum orders received by level */}
-          <div className="flex flex-col gap-1">
-            <label className="text-[#191B1C] text-sm">
-              Maximum orders received by level
-            </label>
-            <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-              15
-            </p>
-          </div>
-          {/* separatro */}
-          <div className="flex justify-between gap-6">
-            {/* Set order number */}
-            <div className="w-full flex flex-col gap-1">
-              <label className="text-[#191B1C] text-sm">Set order number</label>
-              <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-                0
-              </p>
-            </div>
-            {/* Set negative number */}
-            <div className="flex w-full  flex-col gap-1">
-              <label className="text-[#191B1C] text-sm">
-                Set negative number
-              </label>
-              <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-                15
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-between gap-6">
-            {/* Set created date */}
-            <div className="w-full flex flex-col gap-1">
-              <label className="text-[#191B1C] text-sm">Created Date</label>
-              <div className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#4A5154] flex items-center gap-4">
-                <Calendar size={18} color="#A69F93" />
-                <span>15 Nov, 2021</span>
-              </div>
-            </div>
-            {/* Set end date */}
-            <div className="flex w-full  flex-col gap-1">
-              <label className="text-[#191B1C] text-sm">End Date</label>
-              <div className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#4A5154] flex items-center gap-4">
-                <Calendar size={18} color="#A69F93" />
-                <span>15 Nov, 2021</span>
-              </div>
-            </div>
-          </div>
-        </article>
-        <article className="my-6 flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setContinousSingle(false)}
-              className=" cursor-pointer rounded-[160px] px-6 py-4 bg-[#F5F6F7] text-[#191B1C] text-sm font-semibold"
-            >
-              OK
-            </button>
-            <button
-              onClick={handleReset}
-              className="rounded-[160px] px-6 py-4 bg-[#F5F6F7] text-[#191B1C] text-sm font-semibold"
-            >
-              Reset Continuous Orders
-            </button>
-          </div>
-          <div
-            onClick={() => setShowProducts(!showProducts)}
-            className="cursor-pointer rounded-[160px] px-6 py-4 bg-[#A69F93] text-white gap-4 text-sm font-semibold flex items-center"
-          >
-            <span>Set in Product list</span>
-            <MoveRight />
-          </div>
-        </article>
 
-        {showProducts && (
-          <section className="mt-6">
-            {/* Product list  */}
-            <div className="px-5 py-4 border-b border-[#F5F6F7] flex items-center justify-between">
-              <h2 className="text-lg font-medium text-[#191B1C]">
-                Product List
-              </h2>
-              <div
-                onClick={() => setShowProducts(false)}
-                className="size-10 rounded-full bg-[#F5F6F7] flex justify-center cursor-pointer items-center"
-              >
-                <X size={20} />
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <article className="p-6 space-y-4">
+            {/* User Info */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-medium text-[#191B1C] mb-2">
+                User Information
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <p>
+                  <span className="font-medium">Username:</span> {user.username}
+                </p>
+                <p>
+                  <span className="font-medium">Current Balance:</span> $
+                  {user.balance}
+                </p>
+                <p>
+                  <span className="font-medium">Level:</span> {user.level}
+                </p>
+                <p>
+                  <span className="font-medium">Completed Tasks:</span>{" "}
+                  {user.completedTasks}
+                </p>
               </div>
             </div>
-            <article className="p-6 flex items-center justify-between">
-              <div className="flex items-center gap-2 w-full">
-                <div className="flex items-center rounded-sm w-full max-w-[188px] px-4 p-3 border border-[#E5E7E8] text-[#959FA3] text-sm">
-                  <p>Lowest Price</p>
-                </div>
-                <div className="flex items-center rounded-sm w-full max-w-[188px] px-4 p-3 border border-[#E5E7E8] text-[#959FA3] text-sm">
-                  <p>Highest Price</p>
-                </div>
+
+            {/* Negative Amount Input */}
+            <div className="flex flex-col gap-1">
+              <label className="text-[#191B1C] text-sm font-medium">
+                Set Negative Amount
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                {...register("negativeAmount", { valueAsNumber: true })}
+                className="w-full border rounded-sm border-[#E5E7E8] p-3"
+                placeholder="Enter negative amount"
+              />
+              {errors.negativeAmount && (
+                <span className="text-red-500 text-sm">
+                  {errors.negativeAmount.message}
+                </span>
+              )}
+            </div>
+
+            {/* Apply Options */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="applyToAll"
+                  {...register("applyToAll")}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="applyToAll" className="text-[#191B1C] text-sm">
+                  Apply to all products
+                </label>
               </div>
-              <div className="rounded-[160px] px-6 py-4 bg-[#A69F93] text-white gap-4 text-sm font-semibold flex items-center">
-                <span>Screening</span>
-                <MoveRight />
-              </div>
-            </article>
-            <article className="space-y-2 px-6">
-              {products.map((prod, i) => {
-                return (
-                  <div
-                    className={`${
-                      i % 2 === 1 ? "bg-none" : "bg-[#F3F4F6]"
-                    } text-sm  p-2 flex items-center justify-between gap-4`}
-                    key={i}
-                  >
-                    <p className="text-[#191B1C] text-sm">{prod.title}</p>
-                    <p className="text-[#191B1C]">{prod.price}</p>
-                    <div className=" flex items-center gap-4">
-                      <button className="bg-[#A69F93] text-white px-4 rounded-[160px] text-sm leading-10">
-                        Add to order
-                      </button>
-                      <button className="bg-[#A69F93] text-white px-4 rounded-[160px] text-sm leading-10">
-                        Replace next order
-                      </button>
-                    </div>
+            </div>
+
+            {!applyToAll && (
+              <div className="border border-[#E5E7E8] rounded-lg p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-medium text-[#191B1C]">
+                    Select Products
+                  </h4>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={selectAllProducts}
+                      className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearSelection}
+                      className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                    >
+                      Clear
+                    </button>
                   </div>
-                );
-              })}
-            </article>
-          </section>
-        )}
+                </div>
+
+                <div className="max-h-40 overflow-y-auto space-y-2">
+                  {products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
+                    >
+                      <input
+                        type="checkbox"
+                        id={`product-${product.id}`}
+                        checked={selectedProducts.includes(product.id)}
+                        onChange={() => toggleProductSelection(product.id)}
+                        className="w-4 h-4"
+                      />
+                      <label
+                        htmlFor={`product-${product.id}`}
+                        className="flex-1 text-sm cursor-pointer"
+                      >
+                        {product.name} - ${product.price}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+
+                {!applyToAll && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Selected: {selectedProducts.length} product(s)
+                  </p>
+                )}
+              </div>
+            )}
+          </article>
+
+          <article className="px-6 pb-6 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setContinousSingle(false)}
+              className="cursor-pointer rounded-[160px] px-6 py-3 bg-[#F5F6F7] text-[#191B1C] text-sm font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="rounded-[160px] px-6 py-3 bg-[#A69F93] text-white text-sm font-semibold disabled:opacity-50"
+            >
+              {isLoading ? "Setting..." : "Set Override"}
+            </button>
+          </article>
+        </form>
       </section>
     </article>
   );
 };
 
-export default ContinousSingle;
-
-// import { Calendar, ChevronDown, MoveRight, X } from "lucide-react";
-// import { Dispatch, SetStateAction, useState } from "react";
-// import { useForm, SubmitHandler } from "react-hook-form";
-// import * as yup from "yup";
-// import { yupResolver } from "@hookform/resolvers/yup";
-
-// interface ContinousSingleProps {
-//   setContinousSingle: Dispatch<SetStateAction<boolean>>;
-// }
-
-// const products = [
-//   { title: "Sofa Classic Interiors", price: "50.99" },
-//   { title: "Sofa Classic Interiors", price: "50.99" },
-//   { title: "Sofa Classic Interiors", price: "50.99" },
-// ];
-
-// const schema = yup.object().shape({
-//   orderNumber: yup.number().required(),
-//   negativeNumber: yup.number().required(),
-//   createdDate: yup.string().required(),
-//   endDate: yup.string().required(),
-// });
-
-// type FormValues = yup.InferType<typeof schema>;
-
-// const ContinousSingle = ({ setContinousSingle }: ContinousSingleProps) => {
-//   const [showProducts, setShowProducts] = useState(false);
-//   const { register, handleSubmit, reset } = useForm<FormValues>({
-//     resolver: yupResolver(schema),
-//   });
-
-//   const onSubmit: SubmitHandler<FormValues> = (data) => {
-//     console.log("Form Data:", data);
-//     setContinousSingle(false); // Close modal on success
-//   };
-
-//   const handleReset = () => reset();
-
-//   return (
-//     <article className="fixed inset-0 bg-black/30 z-9999 flex justify-center items-center">
-//       <section className="w-full max-w-2xl py-6 h-9/10 scrollbar-hide overflow-y-auto bg-white rounded-lg">
-//         <form onSubmit={handleSubmit(onSubmit)}>
-//           <div className="px-6 pb-4 border-b border-[#2e5163] flex items-center justify-between">
-//             <h2 className="text-lg font-medium text-[#191B1C]">
-//               Set Continuous Single
-//             </h2>
-//             <div
-//               onClick={() => setContinousSingle(false)}
-//               className="size-10 rounded-full bg-[#F5F6F7] flex justify-center cursor-pointer items-center"
-//             >
-//               <X size={20} />
-//             </div>
-//           </div>
-
-//           <article className="p-6 space-y-4">
-//             <div className="flex justify-between gap-6">
-//               <div className="w-full flex flex-col gap-1">
-//                 <label className="text-[#191B1C] text-sm">
-//                   Current number of orders made
-//                 </label>
-//                 <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-//                   0
-//                 </p>
-//               </div>
-//               <div className="flex w-full flex-col gap-1">
-//                 <label className="text-[#191B1C] text-sm">
-//                   Orders received today
-//                 </label>
-//                 <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-//                   15
-//                 </p>
-//               </div>
-//             </div>
-
-//             <div className="flex flex-col gap-1">
-//               <label className="text-[#191B1C] text-sm">
-//                 Maximum orders received by level
-//               </label>
-//               <p className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]">
-//                 15
-//               </p>
-//             </div>
-
-//             <div className="flex justify-between gap-6">
-//               <div className="w-full flex flex-col gap-1">
-//                 <label className="text-[#191B1C] text-sm">
-//                   Set order number
-//                 </label>
-//                 <input
-//                   type="number"
-//                   {...register("orderNumber")}
-//                   className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]"
-//                 />
-//               </div>
-//               <div className="flex w-full flex-col gap-1">
-//                 <label className="text-[#191B1C] text-sm">
-//                   Set negative number
-//                 </label>
-//                 <input
-//                   type="number"
-//                   {...register("negativeNumber")}
-//                   className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#959FA3]"
-//                 />
-//               </div>
-//             </div>
-
-//             <div className="flex justify-between gap-6">
-//               <div className="w-full flex flex-col gap-1">
-//                 <label className="text-[#191B1C] text-sm">Created Date</label>
-//                 <input
-//                   type="text"
-//                   {...register("createdDate")}
-//                   placeholder="15 Nov, 2021"
-//                   className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#4A5154]"
-//                 />
-//               </div>
-//               <div className="flex w-full flex-col gap-1">
-//                 <label className="text-[#191B1C] text-sm">End Date</label>
-//                 <input
-//                   type="text"
-//                   {...register("endDate")}
-//                   placeholder="15 Nov, 2021"
-//                   className="w-full border rounded-sm border-[#E5E7E8] p-[10px] text-[#4A5154]"
-//                 />
-//               </div>
-//             </div>
-//           </article>
-
-//           <article className="my-6 flex items-center justify-between px-6">
-//             <div className="flex items-center gap-4">
-//               <button
-//                 type="submit"
-//                 className="cursor-pointer rounded-[160px] px-6 py-4 bg-[#F5F6F7] text-[#191B1C] text-sm font-semibold"
-//               >
-//                 OK
-//               </button>
-//               <button
-//                 type="button"
-//                 onClick={handleReset}
-//                 className="rounded-[160px] px-6 py-4 bg-[#F5F6F7] text-[#191B1C] text-sm font-semibold"
-//               >
-//                 Reset Continuous Orders
-//               </button>
-//             </div>
-//             <div
-//               onClick={() => setShowProducts(!showProducts)}
-//               className="cursor-pointer rounded-[160px] px-6 py-4 bg-[#A69F93] text-white gap-4 text-sm font-semibold flex items-center"
-//             >
-//               <span>Set in Product list</span>
-//               <MoveRight />
-//             </div>
-//           </article>
-//         </form>
-
-//         {showProducts && (
-//           <section className="mt-6">
-//             <div className="px-5 py-4 border-b border-[#F5F6F7] flex items-center justify-between">
-//               <h2 className="text-lg font-medium text-[#191B1C]">
-//                 Product List
-//               </h2>
-//               <div
-//                 onClick={() => setShowProducts(false)}
-//                 className="size-10 rounded-full bg-[#F5F6F7] flex justify-center cursor-pointer items-center"
-//               >
-//                 <X size={20} />
-//               </div>
-//             </div>
-//             <article className="p-6 flex items-center justify-between">
-//               <div className="flex items-center gap-2 w-full">
-//                 <div className="flex items-center rounded-sm w-full max-w-[188px] px-4 p-3 border border-[#E5E7E8] text-[#959FA3] text-sm">
-//                   <p>Lowest Price</p>
-//                 </div>
-//                 <div className="flex items-center rounded-sm w-full max-w-[188px] px-4 p-3 border border-[#E5E7E8] text-[#959FA3] text-sm">
-//                   <p>Highest Price</p>
-//                 </div>
-//               </div>
-//               <div className="rounded-[160px] px-6 py-4 bg-[#A69F93] text-white gap-4 text-sm font-semibold flex items-center">
-//                 <span>Screening</span>
-//                 <MoveRight />
-//               </div>
-//             </article>
-//             <article className="space-y-2 px-6">
-//               {products.map((prod, i) => (
-//                 <div
-//                   className={`${
-//                     i % 2 === 1 ? "bg-none" : "bg-[#F3F4F6]"
-//                   } text-sm p-2 flex items-center justify-between gap-4`}
-//                   key={i}
-//                 >
-//                   <p className="text-[#191B1C] text-sm">{prod.title}</p>
-//                   <p className="text-[#191B1C]">{prod.price}</p>
-//                   <div className="flex items-center gap-4">
-//                     <button className="bg-[#A69F93] text-white px-4 rounded-[160px] text-sm leading-10">
-//                       Add to order
-//                     </button>
-//                     <button className="bg-[#A69F93] text-white px-4 rounded-[160px] text-sm leading-10">
-//                       Replace next order
-//                     </button>
-//                   </div>
-//                 </div>
-//               ))}
-//             </article>
-//           </section>
-//         )}
-//       </section>
-//     </article>
-//   );
-// };
-
-// export default ContinousSingle;
+export default ContinuousSingle;

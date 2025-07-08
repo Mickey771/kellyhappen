@@ -1,3 +1,4 @@
+// components/admin/dashboard/UserTable.tsx
 "use client";
 import { Dispatch, SetStateAction, useState } from "react";
 import {
@@ -9,19 +10,58 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown";
-import { Calendar, ChevronDown, ChevronUp, MoveRight, X } from "lucide-react";
-import ContinousSingle from "./ContinousSingle";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import ContinuousSingle from "./ContinousSingle";
 import AddDebit from "./AddDebit";
 import WalletInformation from "./WalletInformation";
+import { useAppDispatch } from "@/store/store";
+import { resetUserTasks } from "@/store/reducers/adminSlice";
+
 interface UserTableProps {
-  user: any;
+  user: {
+    id: number;
+    username: string;
+    phone: string;
+    balance: number;
+    level: number;
+    completedTasks: number;
+    createdAt: string;
+  };
   i: number;
 }
+
 const UserTable = ({ user, i }: UserTableProps) => {
+  const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const [continousSingle, setContinousSingle] = useState(false);
   const [showAddDebit, setShowAddDebit] = useState(false);
   const [showWalletInformation, setShowWalletInformation] = useState(false);
+
+  const handleResetTasks = async () => {
+    if (confirm(`Reset completed tasks for ${user.username}?`)) {
+      try {
+        await dispatch(resetUserTasks(user.id)).unwrap();
+        alert("Tasks reset successfully!");
+      } catch (error) {
+        alert("Failed to reset tasks");
+      }
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getLevelBadgeColor = (level: number) => {
+    return level === 1
+      ? "bg-blue-100 text-blue-800"
+      : "bg-purple-100 text-purple-800";
+  };
+
+  const getLevelText = (level: number) => {
+    return level === 1 ? "Beginner" : "Premium";
+  };
+
   return (
     <>
       <tr
@@ -30,18 +70,24 @@ const UserTable = ({ user, i }: UserTableProps) => {
           i % 2 === 0 ? "bg-none" : "bg-white"
         } text-sm text-gray-700`}
       >
-        <td className="px-4 py-3">{user.id}</td>
+        <td className="px-4 py-3">#{user.id}</td>
         <td className="px-4 py-3">{user.username}</td>
         <td className="px-4 py-3">{user.phone}</td>
-        <td className="px-4 py-3">{user.balance}</td>
-        <td className="px-4 py-3">{user.dailyOrders}</td>
-        <td className="px-4 py-3">{user.todayOrders}</td>
-        <td className="px-4 py-3">{user.commission}</td>
-        <td className="px-4 py-3">{user.reputation}</td>
+        <td className="px-4 py-3">${user.balance}</td>
+        <td className="px-4 py-3">
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(
+              user.level
+            )}`}
+          >
+            {getLevelText(user.level)}
+          </span>
+        </td>
+        <td className="px-4 py-3">{user.completedTasks}</td>
         <td className="px-4 py-3">
           <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 bg-white hover:bg-blue-100 cursor-pointer outline-none border-[#EBEBEE] rounded-[30px] border px-3 py-2  text-sm">
+              <button className="flex items-center gap-1 bg-white hover:bg-blue-100 cursor-pointer outline-none border-[#EBEBEE] rounded-[30px] border px-3 py-2 text-sm">
                 Action <ChevronDown size={14} />
               </button>
             </DropdownMenuTrigger>
@@ -56,46 +102,49 @@ const UserTable = ({ user, i }: UserTableProps) => {
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onClick={() => setContinousSingle(true)}
-                  className="text-sm font-medium flex justify-center cursor-pointer bg-[#F3F4F6] text-[#333333CC] hover:text-white hover:bg-[#A69F93] "
+                  className="text-sm font-medium flex justify-center cursor-pointer bg-[#F3F4F6] text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
                 >
-                  Set continuous Single
+                  Set Negative Override
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem
                   onClick={() => setShowAddDebit(true)}
-                  className="text-sm font-medium  flex justify-center bg-[#F3F4F6] cursor-pointer text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
+                  className="text-sm font-medium flex justify-center bg-[#F3F4F6] cursor-pointer text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
                 >
-                  Add Debit
+                  Update Balance
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem className="text-sm font-medium  flex justify-center bg-[#F3F4F6] cursor-pointer text-[#333333CC] hover:text-white hover:bg-[#A69F93]">
-                  <span className="text-center">
-                    Reset Number of Robbed Orders
-                  </span>
+                <DropdownMenuItem
+                  onClick={handleResetTasks}
+                  className="text-sm font-medium flex justify-center bg-[#F3F4F6] cursor-pointer text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
+                >
+                  Reset Completed Tasks
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem
                   onClick={() => setShowWalletInformation(true)}
-                  className="text-sm font-medium  flex justify-center bg-[#F3F4F6] cursor-pointer transition text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
+                  className="text-sm font-medium flex justify-center bg-[#F3F4F6] cursor-pointer transition text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
                 >
-                  Wallet Information
+                  User Details
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </td>
       </tr>
+
       {continousSingle && (
-        <ContinousSingle setContinousSingle={setContinousSingle} />
+        <ContinuousSingle setContinousSingle={setContinousSingle} user={user} />
       )}
       {showWalletInformation && (
-        <WalletInformation setShow={setShowWalletInformation} />
+        <WalletInformation setShow={setShowWalletInformation} user={user} />
       )}
-      {showAddDebit && <AddDebit setShow={setShowAddDebit} />}
+      {showAddDebit && <AddDebit setShow={setShowAddDebit} user={user} />}
     </>
   );
 };
+
 export default UserTable;
