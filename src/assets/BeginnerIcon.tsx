@@ -32,8 +32,8 @@ const BeginnerIcon = () => {
           y2="10.3862"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#52D17C" />
-          <stop offset="1" stop-color="#1A7F7C" />
+          {/* <stopColor stop-color="#52D17C" /> */}
+          {/* <stop offset="1" stop-color="#1A7F7C" /> */}
         </linearGradient>
         <linearGradient
           id="paint1_linear_63_931"

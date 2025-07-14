@@ -12,6 +12,8 @@ interface UserProfile {
   country?: string;
   profilePicture?: string;
   balance: number;
+  level: number;
+  completedTasks: number;
 }
 
 interface Deposit {

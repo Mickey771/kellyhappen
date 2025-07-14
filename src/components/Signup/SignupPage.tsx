@@ -7,7 +7,7 @@ import { IoGiftOutline, IoPersonOutline } from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { signup, clearError } from "@/store/reducers/authSlice";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface FormData {
   phone: string;
@@ -25,6 +25,7 @@ interface FormErrors {
 const SignupPage = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoading, error } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState<FormData>({
@@ -38,10 +39,16 @@ const SignupPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
+    // Auto-fill referral code from URL params
+    const refCode = searchParams.get("ref");
+    if (refCode) {
+      setFormData((prev) => ({ ...prev, inviteCode: refCode }));
+    }
+
     return () => {
       dispatch(clearError());
     };
-  }, [dispatch]);
+  }, [dispatch, searchParams]);
 
   // Validation functions
   const validateEmail = (email: string): boolean => {
@@ -139,6 +146,14 @@ const SignupPage = () => {
           <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
             Create Account
           </h1>
+
+          {/* Show referral code notification */}
+          {formData.inviteCode && (
+            <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+              You're signing up with referral code:{" "}
+              <strong>{formData.inviteCode}</strong>
+            </div>
+          )}
 
           {error && (
             <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
