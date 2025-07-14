@@ -88,13 +88,13 @@ const MembersTable = ({ user, i }: UserTableProps) => {
           </DropdownMenu>
         </td>
       </tr>
-      {continousSingle && (
+      {/* {continousSingle && (
         <ContinousSingle setContinousSingle={setContinousSingle} />
       )}
       {showWalletInformation && (
         <WalletInformation setShow={setShowWalletInformation} />
       )}
-      {showAddDebit && <AddDebit setShow={setShowAddDebit} />}
+      {showAddDebit && <AddDebit setShow={setShowAddDebit} />} */}
     </>
   );
 };
