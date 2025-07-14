@@ -5,6 +5,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import { ChevronLeft, ChevronRight, CircleDot } from "lucide-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface DesignType {
   name: string;
@@ -32,7 +33,13 @@ const designCollection: DesignType[] = [
     image: "/images/classic2.svg",
   },
 ];
-export default function HeroSlider({ data }: { data?: DesignType[] }) {
+export default function HeroSlider({
+  data,
+  mainClassName,
+}: {
+  data?: DesignType[];
+  mainClassName?: string;
+}) {
   const sliderRef = useRef<Slider>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [collections, setCollections] = useState(designCollection);
@@ -88,7 +95,12 @@ export default function HeroSlider({ data }: { data?: DesignType[] }) {
       <Slider ref={sliderRef} {...settings}>
         {designCollection.map(({ name, image }, i) => (
           <div key={i}>
-            <div className="h-[290px] bg-gray-100 flex items-center justify-center">
+            <div
+              className={cn(
+                mainClassName,
+                "h-[290px] bg-gray-100 flex items-center justify-center"
+              )}
+            >
               <Image
                 src={image}
                 alt={name}

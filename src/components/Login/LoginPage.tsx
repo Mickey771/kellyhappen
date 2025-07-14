@@ -78,8 +78,8 @@ const LoginPage = () => {
   };
 
   return (
-    <section className="h-lvh flex">
-      <div className="w-full min-w-[50%] max-w-[816px]">
+    <section className="h-lvh flex-col mf:flex-row flex">
+      <div className=" md:block w-full min-w-[50%] h-[300px] md:h-full max-w-[816px]">
         <Image
           width={0}
           height={0}
@@ -89,8 +89,8 @@ const LoginPage = () => {
           sizes="100vw"
         />
       </div>
-      <div className="w-[45%] flex justify-center">
-        <div className="w-full max-w-[517px] min-w-[80%] pt-22">
+      <div className="w-full md:w-1/2 lg:w-[45%] p-4 flex justify-center">
+        <div className="w-full max-w-[517px] min-w-[80%] pt-5 md:pt-22">
           <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
             Welcome Back
           </h1>
@@ -102,7 +102,7 @@ const LoginPage = () => {
           )}
 
           <form
-            className="w-full flex flex-col gap-4 mt-13"
+            className="w-full flex flex-col gap-4 mt-4 md:mt-13"
             onSubmit={handleSubmit}
           >
             <div className="w-full">
@@ -173,7 +173,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-10 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-4 md:mt-10 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-lg md:rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-center justify-center text-xl font-normal font-['Poppins']">
                 {isLoading ? "Logging in..." : "Log in"}
@@ -181,7 +181,7 @@ const LoginPage = () => {
             </button>
           </form>
 
-          <p className="mt-13 justify-start">
+          <p className="mt-4 md:mt-13 justify-start">
             <span className="text-zinc-800 text-lg font-medium font-['Poppins']">
               Don't have an account?{" "}
             </span>
