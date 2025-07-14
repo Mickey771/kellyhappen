@@ -20,6 +20,7 @@ interface FormErrors {
   phone?: string;
   email?: string;
   username?: string;
+  inviteCode?: string;
 }
 
 const SignupPage = () => {
@@ -65,6 +66,10 @@ const SignupPage = () => {
     return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
   };
 
+  const validateInvitationCode = (username: string): boolean => {
+    return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+  };
+
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
 
@@ -85,6 +90,13 @@ const SignupPage = () => {
     } else if (!validateUsername(formData.username)) {
       errors.username =
         "Username must be at least 3 characters and contain only letters, numbers, and underscores";
+    }
+
+    if (!formData.inviteCode.trim()) {
+      errors.inviteCode = "Invitation Code is required";
+    } else if (!validateInvitationCode(formData.inviteCode)) {
+      errors.username =
+        "Invite must be at least 3 characters and contain only letters, numbers, and underscores";
     }
 
     setFormErrors(errors);
@@ -253,7 +265,7 @@ const SignupPage = () => {
                 <span>
                   <IoGiftOutline />
                 </span>
-                <span>Invitation Code (Optional)</span>
+                <span>Invitation Code *</span>
               </label>
               <input
                 type="text"
@@ -264,6 +276,11 @@ const SignupPage = () => {
                 className="border border-[#33333399] rounded-full py-3 px-4 w-full"
                 placeholder="Enter invitation code if you have one"
               />
+              {formErrors.inviteCode && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.inviteCode}
+                </p>
+              )}
             </div>
 
             <p className="justify-start">

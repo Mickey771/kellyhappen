@@ -101,10 +101,14 @@ export const Deposit = () => {
         />
       </div>
 
-      <div className="p-3 bg-blue-50 rounded-lg">
+      <div className="p-3 bg-blue-50 rounded-lg flex flex-col gap-3">
         <p className="text-sm text-blue-700">
           <strong>Note:</strong> Only USDT deposits are accepted. Your balance
           will be updated after admin verification.
+        </p>
+        <p className="text-sm text-blue-700">
+          <strong>Make deposit to:</strong> ey4djreri39rkfkkf9djfjfkr{" "}
+          <strong>(TRC20)</strong>
         </p>
       </div>
 

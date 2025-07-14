@@ -78,7 +78,7 @@ const LoginPage = () => {
   };
 
   return (
-    <section className="h-lvh flex-col mf:flex-row flex">
+    <section className="h-lvh flex-col md:flex-row flex">
       <div className=" md:block w-full min-w-[50%] h-[300px] md:h-full max-w-[816px]">
         <Image
           width={0}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FaCaretRight } from "react-icons/fa";
 
 interface PlanProps {
@@ -36,7 +37,7 @@ const page: React.FC = () => {
           buttonText="Subscribe for plan"
           features={[
             "38 Tasks",
-            "Can use repestedly",
+            "Can use repeatedly",
             "1% profit in rebates",
             "Chat Support",
             "Higher Benefits",
@@ -53,7 +54,7 @@ const page: React.FC = () => {
         <PlanCard
           title="Beginner Designer"
           subtitle="Earn with this plan"
-          price="$0"
+          price="$50"
           priceLabel="To open"
           buttonText="Subscribe for Plan"
           features={[
@@ -106,12 +107,14 @@ const PlanCard: React.FC<PlanProps> = ({
           <span>{price}</span>
           <span className="ml-2 text-xs font-semibold">{priceLabel}</span>
         </div>
-        <button
-          className="w-full outline-none hover:opacity-80 py-3 rounded-md mb-8 mt-4 text-xs cursor-pointer font-semibold"
-          style={{ backgroundColor: buttonBg, color: buttonTextColor }}
-        >
-          {buttonText}
-        </button>
+        <Link href={"/user/wallet"}>
+          <button
+            className="w-full outline-none hover:opacity-80 py-3 rounded-md mb-8 mt-4 text-xs cursor-pointer font-semibold"
+            style={{ backgroundColor: buttonBg, color: buttonTextColor }}
+          >
+            {buttonText}
+          </button>
+        </Link>
         <ul className="space-y-2">
           {features.map((feature, idx) => (
             <li key={idx} className="flex items-center text-sm">
@@ -132,12 +135,12 @@ const PlanCard: React.FC<PlanProps> = ({
           ))}
         </ul>
       </div>
-      <div
+      {/* <div
         className="text-center font-semibold py-4 rounded-lg mt-12 cursor-pointer hover:opacity-80 select-none"
         style={{ backgroundColor: footerBg, color: footerTextColor }}
       >
         See all features
-      </div>
+      </div> */}
     </div>
   );
 };
