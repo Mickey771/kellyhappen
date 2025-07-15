@@ -10,23 +10,23 @@ import React, { useRef, useState } from "react";
 const designCollection = [
   {
     name: "Classic",
-    image: "/images/classic2.svg",
+    image: "classic",
   },
   {
     name: "Home",
-    image: "/images/classic2.svg",
+    image: "home",
   },
   {
     name: "Stores",
-    image: "/images/classic2.svg",
+    image: "store",
   },
   {
     name: "Minimalist",
-    image: "/images/classic2.svg",
+    image: "minimalist",
   },
   {
     name: "Scandinavian",
-    image: "/images/classic2.svg",
+    image: "scandinavian",
   },
 ];
 
@@ -117,12 +117,13 @@ function HeroSlider() {
       <Slider ref={sliderRef} {...settings}>
         {designCollection.map(({ name, image }, i) => (
           <div key={i}>
-            <div className="h-[290px] bg-gray-100 flex items-center justify-center">
+            <div className="h-[320px] bg-gray-100 flex items-center justify-center">
               <Image
-                src={image}
+                src={`/images/${image}one.jpg`}
                 alt={name}
                 width={0}
                 height={0}
+                sizes="100vw"
                 className="w-full h-full object-cover rounded-md"
               />
               <p className="absolute top-1/3 bg-[#A69F93] px-4 sm:px-6 md:px-10 py-3 rounded-[10px] text-2xl md:text-[40px] leading-[112.9%] text-[#111111]">
@@ -203,10 +204,11 @@ function BottomSlider() {
             {/* Each slide */}
             <div className="relative h-[312px] w-full max-w-[319px] bg-gray-100 rounded-[20px] overflow-hidden">
               <Image
-                src={image}
+                src={`/images/${image}two.jpg`}
                 alt={name}
                 width={0}
                 height={0}
+                sizes="100vw"
                 className="w-full h-full object-cover"
               />
               <p className="absolute top-1/2 left-1/2 -translate-x-1/2 bg-[#A69F93] px-5 py-3 rounded-[10px] text-[24px] leading-[112.9%] text-[#111111]">
