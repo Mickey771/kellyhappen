@@ -28,12 +28,9 @@ const page = () => {
         Refer Your Friends
       </h2>
       <div className="my-10 p-4 md:p-10 w-full max-w-[517px] rounded-[30px] bg-gradient-to-r from-[#A69F93] to-[#734F10] text-white">
-        <h2 className="text-center text-2xl font-bold">
-          Invite a friend and get
-        </h2>
+        <h2 className="text-center text-2xl font-bold">Invite a friend</h2>
         <p className="mt-6 text-xl leading-[150%] text-center">
-          Give a friend promo code on $15 and you'll get $15 off your next NFT
-          post.
+          Your friend gets 25% bonus on every profit you make
         </p>
         <div className="mt-12 flex justify-center items-center gap-7">
           <button

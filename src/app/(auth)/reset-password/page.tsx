@@ -1,55 +1,59 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { IoPersonOutline } from "react-icons/io5";
 import { TbLockPassword } from "react-icons/tb";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { login, clearError } from "@/store/reducers/authSlice";
-import { useRouter } from "next/navigation";
+import { resetPassword, clearError } from "@/store/reducers/authSlice";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface FormData {
-  username: string;
   password: string;
+  confirmPassword: string;
 }
 
 interface FormErrors {
-  username?: string;
   password?: string;
+  confirmPassword?: string;
 }
 
-const LoginPage = () => {
+const ResetPasswordPage = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isLoading, error, isAuthenticated } = useAppSelector(
-    (state) => state.auth
-  );
+  const searchParams = useSearchParams();
+  const { isLoading, error } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState<FormData>({
-    username: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [token, setToken] = useState<string>("");
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/user/dashboard");
+    const tokenFromQuery = searchParams.get("token");
+    if (tokenFromQuery) {
+      setToken(tokenFromQuery);
+    } else {
+      router.push("/login");
     }
-
-    return () => {
-      dispatch(clearError());
-    };
-  }, [isAuthenticated, router, dispatch]);
+  }, [searchParams, router]);
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
 
-    if (!formData.username.trim()) {
-      errors.username = "Username is required";
-    }
-
     if (!formData.password.trim()) {
       errors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters long";
+    }
+
+    if (!formData.confirmPassword.trim()) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
     }
 
     setFormErrors(errors);
@@ -63,6 +67,10 @@ const LoginPage = () => {
     if (formErrors[name as keyof FormErrors]) {
       setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+
+    if (error) {
+      dispatch(clearError());
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,11 +79,54 @@ const LoginPage = () => {
     if (!validateForm()) return;
 
     try {
-      await dispatch(login(formData)).unwrap();
+      await dispatch(
+        resetPassword({ token, password: formData.password })
+      ).unwrap();
+      setIsSubmitted(true);
     } catch (error) {
       // Error handled by Redux slice
     }
   };
+
+  if (isSubmitted) {
+    return (
+      <section className="h-lvh flex-col md:flex-row flex">
+        <div className=" md:block w-full min-w-[50%] h-[300px] md:h-full max-w-[816px]">
+          <Image
+            width={0}
+            height={0}
+            alt="loginimg"
+            src={"/images/loginimg.png"}
+            style={{ width: "100%", height: "100%" }}
+            sizes="100vw"
+          />
+        </div>
+        <div className="w-full md:w-1/2 lg:w-[45%] p-4 flex justify-center">
+          <div className="w-full max-w-[517px] min-w-[80%] pt-5 md:pt-22">
+            <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
+              Password Reset
+            </h1>
+
+            <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+              <p className="text-base font-normal font-['Poppins']">
+                Your password has been successfully reset. You can now log in
+                with your new password.
+              </p>
+            </div>
+
+            <Link
+              href="/login"
+              className="mt-4 md:mt-10 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-lg md:rounded-[40px] overflow-hidden flex items-center justify-center"
+            >
+              <span className="text-center justify-center text-xl font-normal font-['Poppins']">
+                Continue to Login
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="h-lvh flex-col md:flex-row flex">
@@ -92,8 +143,12 @@ const LoginPage = () => {
       <div className="w-full md:w-1/2 lg:w-[45%] p-4 flex justify-center">
         <div className="w-full max-w-[517px] min-w-[80%] pt-5 md:pt-22">
           <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
-            Welcome Back
+            Reset Password
           </h1>
+
+          <p className="mt-4 text-[#333]/60 text-base font-normal font-['Poppins']">
+            Please enter your new password below.
+          </p>
 
           {error && (
             <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -107,41 +162,13 @@ const LoginPage = () => {
           >
             <div className="w-full">
               <label
-                htmlFor="username"
-                className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
-              >
-                <span>
-                  <IoPersonOutline />
-                </span>
-                <span>Username</span>
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                className={`border rounded-full py-3 px-4 w-full ${
-                  formErrors.username ? "border-red-500" : "border-[#33333399]"
-                }`}
-                placeholder="Enter your username"
-              />
-              {formErrors.username && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.username}
-                </p>
-              )}
-            </div>
-
-            <div className="w-full">
-              <label
                 htmlFor="password"
                 className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
               >
                 <span>
                   <TbLockPassword />
                 </span>
-                <span>Password</span>
+                <span>New Password</span>
               </label>
               <input
                 type="password"
@@ -152,7 +179,7 @@ const LoginPage = () => {
                 className={`border rounded-full py-3 px-4 w-full ${
                   formErrors.password ? "border-red-500" : "border-[#33333399]"
                 }`}
-                placeholder="Enter your password"
+                placeholder="Enter your new password"
               />
               {formErrors.password && (
                 <p className="text-red-500 text-sm mt-1">
@@ -161,13 +188,34 @@ const LoginPage = () => {
               )}
             </div>
 
-            <div className="flex justify-end">
-              <Link
-                href="/forgot-password"
-                className="text-blue-600 text-sm font-normal font-['Poppins'] hover:underline"
+            <div className="w-full">
+              <label
+                htmlFor="confirmPassword"
+                className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
               >
-                Forgot password?
-              </Link>
+                <span>
+                  <TbLockPassword />
+                </span>
+                <span>Confirm Password</span>
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className={`border rounded-full py-3 px-4 w-full ${
+                  formErrors.confirmPassword
+                    ? "border-red-500"
+                    : "border-[#33333399]"
+                }`}
+                placeholder="Confirm your new password"
+              />
+              {formErrors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             <button
@@ -176,20 +224,20 @@ const LoginPage = () => {
               className="mt-4 md:mt-10 cursor-pointer self-stretch h-16 relative bg-[#111] hover:bg-white text-white hover:text-[#111] border border-[#111] rounded-lg md:rounded-[40px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-center justify-center text-xl font-normal font-['Poppins']">
-                {isLoading ? "Logging in..." : "Log in"}
+                {isLoading ? "Resetting..." : "Reset Password"}
               </span>
             </button>
           </form>
 
-          <p className="mt-4 md:mt-13 justify-start">
+          <p className="mt-4 md:mt-13 justify-start text-center">
             <span className="text-zinc-800 text-lg font-medium font-['Poppins']">
-              Don't have an account?{" "}
+              Remember your password?{" "}
             </span>
             <Link
-              href="/signup"
+              href="/login"
               className="text-blue-600 text-lg font-bold font-['Poppins']"
             >
-              Sign up
+              Back to Login
             </Link>
           </p>
         </div>
@@ -198,4 +246,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ResetPasswordPage;
