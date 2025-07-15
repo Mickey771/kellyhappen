@@ -131,6 +131,29 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+export const resendCredentials = createAsyncThunk(
+  "auth/resendCredentials",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/auth/resend-credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        return rejectWithValue(data.message);
+      }
+
+      return data;
+    } catch (error) {
+      return rejectWithValue("Network error occurred");
+    }
+  }
+);
+
 export const logout = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
