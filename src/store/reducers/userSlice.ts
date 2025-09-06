@@ -14,6 +14,7 @@ interface UserProfile {
   balance: number;
   level: number;
   completedTasks: number;
+  maxTasks: number;
 }
 
 interface Deposit {

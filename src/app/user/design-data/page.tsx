@@ -220,23 +220,10 @@ const Page = () => {
 
       <button
         onClick={handleSubmitDesign}
-        className="my-[22px] hidden md:block w-full max-w-[900px] bg-[#A69F93] rounded-[14px] py-3 text-center text-white hover:bg-[#A69F93]/80"
+        className="my-[22px]  w-full max-w-[900px] bg-[#A69F93] rounded-[14px] py-3 text-center text-white hover:bg-[#A69F93]/80"
       >
         Submit Design
       </button>
-
-      <article className="bg-gradient-to-r from-[#D7D0C6] to-[#655F56DE] max-w-[900px] text-white h-full md:h-[198px] rounded-[20px] mt-[24px] p-4 sm:p-6">
-        <h2 className="mt-2 text-2xl md:text-3xl font-semibold leading-[130%]">
-          Why Kelly Hoppen
-        </h2>
-        <p className="text-sm leading-[150%] mt-1">
-          Kelly Hoppen is a renowned designer, known for her minimalist and
-          luxurious approach to both residential and commercial spaces.
-        </p>
-        <button className="mt-4 rounded-[14px] px-6 py-3 outline-none cursor-pointer border border-[#A69F93] bg-white text-sm font-bold leading-[150%] text-[#A69F93]">
-          Learn More
-        </button>
-      </article>
 
       <ProductModal
         isOpen={showModal}
@@ -249,6 +236,19 @@ const Page = () => {
       <div className="mt-[26px]">
         <HeroSlider />
       </div>
+
+      <article className="bg-gradient-to-r mb-20 from-[#D7D0C6] to-[#655F56DE] max-w-[900px] text-white h-full md:h-[198px] rounded-[20px] mt-[24px] p-4 sm:p-6">
+        <h2 className="mt-2 text-2xl md:text-3xl font-semibold leading-[130%]">
+          Why Kelly Hoppen
+        </h2>
+        <p className="text-sm leading-[150%] mt-1">
+          Kelly Hoppen is a renowned designer, known for her minimalist and
+          luxurious approach to both residential and commercial spaces.
+        </p>
+        <button className="mt-4 rounded-[14px] px-6 py-3 outline-none cursor-pointer border border-[#A69F93] bg-white text-sm font-bold leading-[150%] text-[#A69F93]">
+          Learn More
+        </button>
+      </article>
     </section>
   );
 };

@@ -3,7 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { BsTelephone } from "react-icons/bs";
-import { IoGiftOutline, IoPersonOutline } from "react-icons/io5";
+import {
+  IoGiftOutline,
+  IoPersonOutline,
+  IoLockClosedOutline,
+} from "react-icons/io5";
 import { MdEmail } from "react-icons/md";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { signup, clearError } from "@/store/reducers/authSlice";
@@ -13,6 +17,8 @@ interface FormData {
   phone: string;
   email: string;
   username: string;
+  password: string;
+  confirmPassword: string;
   inviteCode: string;
 }
 
@@ -20,6 +26,8 @@ interface FormErrors {
   phone?: string;
   email?: string;
   username?: string;
+  password?: string;
+  confirmPassword?: string;
   inviteCode?: string;
 }
 
@@ -33,14 +41,15 @@ const SignupPage = () => {
     phone: "",
     email: "",
     username: "",
+    password: "",
+    confirmPassword: "",
     inviteCode: "",
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    // Auto-fill referral code from URL params
     const refCode = searchParams.get("ref");
     if (refCode) {
       setFormData((prev) => ({ ...prev, inviteCode: refCode }));
@@ -66,8 +75,12 @@ const SignupPage = () => {
     return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
   };
 
-  const validateInvitationCode = (username: string): boolean => {
-    return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 6;
+  };
+
+  const validateInvitationCode = (code: string): boolean => {
+    return code.length >= 3 && /^[a-zA-Z0-9_]+$/.test(code);
   };
 
   const validateForm = (): boolean => {
@@ -92,11 +105,23 @@ const SignupPage = () => {
         "Username must be at least 3 characters and contain only letters, numbers, and underscores";
     }
 
+    if (!formData.password.trim()) {
+      errors.password = "Password is required";
+    } else if (!validatePassword(formData.password)) {
+      errors.password = "Password must be at least 6 characters long";
+    }
+
+    if (!formData.confirmPassword.trim()) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
     if (!formData.inviteCode.trim()) {
       errors.inviteCode = "Invitation Code is required";
     } else if (!validateInvitationCode(formData.inviteCode)) {
-      errors.username =
-        "Invite must be at least 3 characters and contain only letters, numbers, and underscores";
+      errors.inviteCode =
+        "Invite code must be at least 3 characters and contain only letters, numbers, and underscores";
     }
 
     setFormErrors(errors);
@@ -115,7 +140,6 @@ const SignupPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
 
     if (!validateForm()) return;
 
@@ -124,26 +148,46 @@ const SignupPage = () => {
         phone: formData.phone,
         email: formData.email,
         username: formData.username,
+        password: formData.password,
         ...(formData.inviteCode && { inviteCode: formData.inviteCode }),
       };
 
-      const result = await dispatch(signup(signupData)).unwrap();
+      await dispatch(signup(signupData)).unwrap();
 
-      // Store email for verification page
-      localStorage.setItem("userEmail", formData.email);
+      setShowSuccess(true);
 
-      // Redirect to verification page instead of login
-      router.push(
-        `/signup-verification?email=${encodeURIComponent(formData.email)}`
-      );
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
     } catch (error) {
-      // Error is handled by Redux slice
+      // Error handled by Redux slice
     }
   };
 
+  // Success screen
+  if (showSuccess) {
+    return (
+      <section className="flex items-center justify-center min-h-screen">
+        <div className="text-center p-8 bg-green-50 border border-green-200 rounded-lg max-w-md">
+          <div className="text-6xl text-green-500 mb-4">✓</div>
+          <h2 className="text-2xl font-semibold text-green-800 mb-2">
+            Account Created Successfully!
+          </h2>
+          <p className="text-green-700 mb-4">
+            Your account has been created. Redirecting to login page...
+          </p>
+          <Link href="/login" className="text-blue-600 underline">
+            Click here if not redirected
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="flex flex-col gap-5 md:flex-row">
-      <div className=" md:block w-full min-w-[50%] h-[300px] md:h-full max-w-[816px]">
+      <div className="md:block w-full min-w-[50%] h-[300px] md:h-full max-w-[816px]">
         <Image
           width={0}
           height={0}
@@ -153,13 +197,14 @@ const SignupPage = () => {
           sizes="100vw"
         />
       </div>
+
       <div className="w-full md:w-1/2 lg:w-[45%] p-4 flex justify-center">
         <div className="w-full max-w-[517px] min-w-[80%] md:pt-22">
           <h1 className="justify-center text-[#333] text-5xl font-medium font-['Poppins']">
             Create Account
           </h1>
 
-          {/* Show referral code notification */}
+          {/* Referral code notification */}
           {formData.inviteCode && (
             <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
               You're signing up with referral code:{" "}
@@ -167,6 +212,7 @@ const SignupPage = () => {
             </div>
           )}
 
+          {/* Error message */}
           {error && (
             <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
               {error}
@@ -177,14 +223,13 @@ const SignupPage = () => {
             className="w-full flex flex-col gap-4 mt-5 md:mt-13"
             onSubmit={handleSubmit}
           >
+            {/* Phone Number */}
             <div className="w-full">
               <label
                 htmlFor="phone"
                 className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
               >
-                <span>
-                  <BsTelephone />
-                </span>
+                <BsTelephone />
                 <span>Phone Number *</span>
               </label>
               <input
@@ -203,14 +248,13 @@ const SignupPage = () => {
               )}
             </div>
 
+            {/* Email */}
             <div className="w-full">
               <label
                 htmlFor="email"
                 className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
               >
-                <span>
-                  <MdEmail />
-                </span>
+                <MdEmail />
                 <span>Email Address *</span>
               </label>
               <input
@@ -229,14 +273,13 @@ const SignupPage = () => {
               )}
             </div>
 
+            {/* Username */}
             <div className="w-full">
               <label
                 htmlFor="username"
                 className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
               >
-                <span>
-                  <IoPersonOutline />
-                </span>
+                <IoPersonOutline />
                 <span>Username *</span>
               </label>
               <input
@@ -257,14 +300,69 @@ const SignupPage = () => {
               )}
             </div>
 
+            {/* Password */}
+            <div className="w-full">
+              <label
+                htmlFor="password"
+                className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
+              >
+                <IoLockClosedOutline />
+                <span>Password *</span>
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className={`border rounded-full py-3 px-4 w-full ${
+                  formErrors.password ? "border-red-500" : "border-[#33333399]"
+                }`}
+                placeholder="Create a password"
+              />
+              {formErrors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.password}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="w-full">
+              <label
+                htmlFor="confirmPassword"
+                className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
+              >
+                <IoLockClosedOutline />
+                <span>Confirm Password *</span>
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className={`border rounded-full py-3 px-4 w-full ${
+                  formErrors.confirmPassword
+                    ? "border-red-500"
+                    : "border-[#33333399]"
+                }`}
+                placeholder="Confirm your password"
+              />
+              {formErrors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.confirmPassword}
+                </p>
+              )}
+            </div>
+
+            {/* Invitation Code */}
             <div className="w-full">
               <label
                 htmlFor="inviteCode"
                 className="flex items-center gap-2.5 text-[#333]/60 text-base font-normal font-['Poppins']"
               >
-                <span>
-                  <IoGiftOutline />
-                </span>
+                <IoGiftOutline />
                 <span>Invitation Code *</span>
               </label>
               <input
@@ -273,8 +371,12 @@ const SignupPage = () => {
                 name="inviteCode"
                 value={formData.inviteCode}
                 onChange={handleInputChange}
-                className="border border-[#33333399] rounded-full py-3 px-4 w-full"
-                placeholder="Enter invitation code if you have one"
+                className={`border rounded-full py-3 px-4 w-full ${
+                  formErrors.inviteCode
+                    ? "border-red-500"
+                    : "border-[#33333399]"
+                }`}
+                placeholder="Enter invitation code"
               />
               {formErrors.inviteCode && (
                 <p className="text-red-500 text-sm mt-1">
@@ -283,6 +385,7 @@ const SignupPage = () => {
               )}
             </div>
 
+            {/* Terms */}
             <p className="justify-start">
               <span className="text-[#333] text-sm font-normal font-['Poppins']">
                 By signing up, you agree to the{" "}
@@ -306,6 +409,7 @@ const SignupPage = () => {
               </span>
             </p>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -317,6 +421,7 @@ const SignupPage = () => {
             </button>
           </form>
 
+          {/* Login Link */}
           <p className="mt-13 justify-start">
             <span className="text-zinc-800 text-lg font-medium font-['Poppins']">
               Already have an account?{" "}

@@ -127,21 +127,6 @@ const DashboardPage = () => {
                 </div>
                 {icon}
               </div>
-              {/* <div className="mt-6 flex text-[#606060] text-sm xl:text-base items-center gap-1">
-                {status === "down" ? (
-                  <TrendingDown color="#F93C65" size={20} />
-                ) : (
-                  <TrendingUp color="#00B69B" size={20} />
-                )}
-                <p
-                  className={`font-medium ${
-                    status === "down" ? "text-[#F93C65]" : "text-[#00B69B]"
-                  }`}
-                >
-                  {percentage}
-                </p>
-                <p className="text-[#606060] font-semibold">{downText}</p>
-              </div> */}
             </article>
           )
         )}

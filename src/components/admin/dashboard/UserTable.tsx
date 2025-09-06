@@ -1,6 +1,6 @@
 // components/admin/dashboard/UserTable.tsx
 "use client";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import ContinuousSingle from "./ContinousSingle";
 import AddDebit from "./AddDebit";
 import WalletInformation from "./WalletInformation";
+import PasswordUpdate from "./PasswordUpdate";
 import { useAppDispatch } from "@/store/store";
 import { resetUserTasks } from "@/store/reducers/adminSlice";
 
@@ -36,6 +37,7 @@ const UserTable = ({ user, i }: UserTableProps) => {
   const [continousSingle, setContinousSingle] = useState(false);
   const [showAddDebit, setShowAddDebit] = useState(false);
   const [showWalletInformation, setShowWalletInformation] = useState(false);
+  const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);
 
   const handleResetTasks = async () => {
     if (confirm(`Reset completed tasks for ${user.username}?`)) {
@@ -46,10 +48,6 @@ const UserTable = ({ user, i }: UserTableProps) => {
         alert("Failed to reset tasks");
       }
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
   };
 
   const getLevelBadgeColor = (level: number) => {
@@ -125,6 +123,14 @@ const UserTable = ({ user, i }: UserTableProps) => {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem
+                  onClick={() => setShowPasswordUpdate(true)}
+                  className="text-sm font-medium flex justify-center bg-[#F3F4F6] cursor-pointer text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
+                >
+                  Update Password
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
                   onClick={() => setShowWalletInformation(true)}
                   className="text-sm font-medium flex justify-center bg-[#F3F4F6] cursor-pointer transition text-[#333333CC] hover:text-white hover:bg-[#A69F93]"
                 >
@@ -143,6 +149,9 @@ const UserTable = ({ user, i }: UserTableProps) => {
         <WalletInformation setShow={setShowWalletInformation} user={user} />
       )}
       {showAddDebit && <AddDebit setShow={setShowAddDebit} user={user} />}
+      {showPasswordUpdate && (
+        <PasswordUpdate setShow={setShowPasswordUpdate} user={user} />
+      )}
     </>
   );
 };
