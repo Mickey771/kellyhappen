@@ -42,9 +42,12 @@ const Banner = () => {
         </Link>
       </section>
       <article className="p-5 bg-[#111111] w-full md:pb-0 flex justify-center items-center">
-        <div className="max-w-[1256px] w-full">
+        {/* <div className="max-w-[1256px] w-full">
           <HeroSlider mainClassName="!h-[390px] md:!h-[653px] " />
-        </div>
+        </div> */}
+        <video autoPlay muted loop className="w-full h-[653px]">
+          <source src="/file.mp4" />
+        </video>
       </article>
     </>
   );
