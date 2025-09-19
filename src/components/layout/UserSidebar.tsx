@@ -203,8 +203,13 @@ const UserSidebar = () => {
             <article className="mt-9 flex justify-end px-4 items-center gap-4">
               <BeginnerIcon />
               <div className="flex text-[#333333] gap-1 flex-col">
-                <p className="font-[300]">Unlock 0.75%</p>
-                <p className="font-semibold">Beginner Designer</p>
+                <p className="font-[300]">
+                  {" "}
+                  {profile?.level === 1 ? "Unlock 0.75%" : "1%"}{" "}
+                </p>
+                <p className="font-semibold">
+                  {profile?.level === 1 ? "Beginner" : "Premium"} Designer
+                </p>
               </div>
             </article>
             <section className="mt-8  px-4">
@@ -348,8 +353,12 @@ const UserSidebar = () => {
             <article className="mt-9  flex px-4 items-center gap-4">
               <BeginnerIcon />
               <div className="flex text-[#333333] gap-1 flex-col">
-                <p className="font-[300]">Unlock 0.75%</p>
-                <p className="font-semibold">Beginner Designer</p>
+                <p className="font-[300]">
+                  Unlocked {profile?.level === 1 ? " 0.75%" : "1%"}{" "}
+                </p>
+                <p className="font-semibold">
+                  {profile?.level === 1 ? "Beginner" : "Premium"} Designer
+                </p>
               </div>
             </article>
           )}

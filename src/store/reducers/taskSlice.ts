@@ -1,6 +1,16 @@
 // store/slices/taskSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+interface Product {
+  id: number;
+  name: string;
+  image?: string;
+  price: number;
+  negativeAmount: number;
+  endDate: string;
+  isActive: boolean;
+}
+
 interface Task {
   id: number;
   productId: number;
@@ -82,7 +92,7 @@ export const submitTask = createAsyncThunk(
         return rejectWithValue(data.message);
       }
 
-      return data.task;
+      return { task: data.task, productId };
     } catch (error) {
       return rejectWithValue("Network error occurred");
     }
@@ -136,7 +146,23 @@ const taskSlice = createSlice({
       })
       .addCase(submitTask.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.tasks.unshift(action.payload);
+
+        // Find the product data from available products
+        const productData = state.availableProducts.find(
+          (product) => product.id === action.payload.productId
+        );
+
+        // Add the new task to completed tasks with full product data
+        const taskWithProduct = {
+          ...action.payload.task,
+          product: productData || action.payload.task.product,
+        };
+        state.tasks.unshift(taskWithProduct);
+
+        // Remove the product from available products
+        state.availableProducts = state.availableProducts.filter(
+          (product) => product.id !== action.payload.productId
+        );
       })
       .addCase(submitTask.rejected, (state, action) => {
         state.isLoading = false;

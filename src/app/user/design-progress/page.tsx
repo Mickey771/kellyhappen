@@ -113,7 +113,10 @@ const ProductModal = ({
             <div className="bg-gray-50 p-4 rounded-lg text-center">
               <p className="text-gray-600 font-medium">Debit Amount</p>
               <p className="text-2xl font-bold text-[#171717]">
-                ${product.negativeAmount.toFixed(2)}
+                $
+                {product.negativeAmount > 0
+                  ? product.negativeAmount * -1
+                  : product.negativeAmount.toFixed(2)}
               </p>
             </div>
           </div>
@@ -411,7 +414,10 @@ const ProductCard = ({
         <div className="text-right">
           <p className="text-[#454545] font-semibold">Debit Amount</p>
           <p className="text-[#171717] text-xl font-bold">
-            ${product.negativeAmount.toFixed(2)}
+            $
+            {product.negativeAmount > 0
+              ? product.negativeAmount * -1
+              : product.negativeAmount.toFixed(2)}
           </p>
         </div>
       </div>

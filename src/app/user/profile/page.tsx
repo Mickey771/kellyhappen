@@ -7,6 +7,7 @@ import Image from "next/image";
 import { FaCaretRight } from "react-icons/fa";
 import { useState } from "react";
 import { MdOutlineLiveHelp } from "react-icons/md";
+import { useAppSelector } from "@/store/store";
 type FormValues = {
   firstName: string;
   lastName: string;
@@ -21,6 +22,8 @@ const page = () => {
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const { profile } = useAppSelector((state) => state.user);
 
   const {
     register,
@@ -54,8 +57,12 @@ const page = () => {
         <div className="flex items-center gap-4">
           <BeginnerIcon />
           <div className="flex text-[#333333] gap-1 flex-col">
-            <p className="font-[300]">Unlock 0.75%</p>
-            <p className="font-semibold">Beginner Designer</p>
+            <p className="font-[300]">
+              Unlocked {profile?.level === 1 ? " 0.75%" : "1%"}{" "}
+            </p>
+            <p className="font-semibold">
+              {profile?.level === 1 ? "Beginner" : "Premium"} Designer
+            </p>
           </div>
         </div>
         <button className="cursor-pointer hover:opacity-70 rounded-[12px] bg-[#A69F93] text-white px-6 py-3 text-sm font-bold">
